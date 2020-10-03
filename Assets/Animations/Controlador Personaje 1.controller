@@ -422,9 +422,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 7
+  - m_ConditionMode: 3
     m_ConditionEvent: idlerandom
-    m_EventTreshold: 0
+    m_EventTreshold: -1
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -6651311322843921631}
   m_Solo: 0
@@ -495,9 +495,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 7
+  - m_ConditionMode: 3
     m_ConditionEvent: idlerandom
-    m_EventTreshold: 0
+    m_EventTreshold: -1
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -6651311322843921631}
   m_Solo: 0
@@ -1042,9 +1042,9 @@ AnimatorStateTransition:
   m_PrefabAsset: {fileID: 0}
   m_Name: 
   m_Conditions:
-  - m_ConditionMode: 7
+  - m_ConditionMode: 3
     m_ConditionEvent: idlerandom
-    m_EventTreshold: 0
+    m_EventTreshold: -1
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: -6651311322843921631}
   m_Solo: 0
@@ -1170,13 +1170,13 @@ AnimatorController:
   m_Name: Controlador Personaje 1
   serializedVersion: 5
   m_AnimatorParameters:
-  - m_Name: Velocidad_x
+  - m_Name: Velocidad_y
     m_Type: 1
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
     m_Controller: {fileID: 0}
-  - m_Name: Velocidad_y
+  - m_Name: Velocidad_x
     m_Type: 1
     m_DefaultFloat: 0
     m_DefaultInt: 0
