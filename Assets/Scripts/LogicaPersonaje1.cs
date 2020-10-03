@@ -1,25 +1,38 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+[DisallowMultipleComponent]
 public class LogicaPersonaje1 : MonoBehaviour
 {
-    //Velocidad de caminar
+    [Header("Variables de configuracion")]
+    [Range(1,20)]
+    [Tooltip("Velocidad de caminar")]
     public float velocidadCaminar = 5.0f;
-    //Multiplicador de correr x caminar ( 2 x 5.f )
+    [Tooltip("Multiplicador de caminar x correr, ejemplo ( 2 x 5.f )")]
+    [Range(1,20)]
     public float velocidadCorrerX = 2.0f;
+    [Tooltip("Multiplicador de caminar x agacharce, ejemplo ( 2 x 5.f )")]
+    [Range(1,20)]
     public float velocidadAgachadoX = 0.5f;
-    // public float velocidadAgachadoCorrerX = 0.5f;
+    [Tooltip("configuracion de rotacion")]
+    [Range(1,400)]
     public float rotar = 200.0f;
-    public float x,y;
+    [Tooltip("La intensidad del salto")]
+    [Range(1,20)]
     public float ForceJump = 8f;
+    [Tooltip("Valor Eje X")]
+    [Range(-1,1)]
+    public float x;
+    [Tooltip("Valor Eje Y")]
+    [Range(-1,1)]
+    public float y;
+    [Header("Variables de Animacion")]
+
     public bool Can_jump;
+    public bool waitIdle;
+
     private Animator anim;
     private Rigidbody rb;
-
-/*
-    crear codigo para estar stay o afk
-*/
 
     // Start is called before the first frame update
     void Start()
@@ -36,14 +49,15 @@ public class LogicaPersonaje1 : MonoBehaviour
         x = Input.GetAxis("Horizontal");
         y = Input.GetAxis("Vertical");
         //Insertar informacion en Animator de los eje X y Y
-        anim.SetFloat("Velocidad_x", x);
-        anim.SetFloat("Velocidad_y", y); 
+        InjectEjesPrincipales(x,y);
+        //Verifica si el personaje se mueve o no
+        Idle();
         //Insertar informacion en Animator de "Run?"
         Corriendo_Update();
         //Insertar informacion en Animator de "Crouched?"
         Agacharce_Update();
-        //Insertar informacion en Animator de salto y caida
-        if (Can_jump) { Saltar(); } else {  Falling(); }
+        //Insertar informacion en Animator de Salto y Caida
+        JumpAndFall();
     }
 
     private void FixedUpdate() {
@@ -68,6 +82,22 @@ public class LogicaPersonaje1 : MonoBehaviour
         if (Input.GetKeyUp(KeyCode.LeftControl)) { anim.SetBool("Crouched?", false); }
     }
     
+    public void  Idle(){
+        if(x == 0  && y == 0){ anim.SetBool("waitIdle?", true);
+           waitIdle = anim.GetBool("waitIdle?");
+        }
+        else{ anim.SetBool("waitIdle?", false);
+           waitIdle = anim.GetBool("waitIdle?");
+        }
+    }     
+
+    public void JumpAndFall(){
+                if (Can_jump) { Saltar(); } else {  Falling(); }
+    }
+   public void InjectEjesPrincipales(float x, float y){
+        anim.SetFloat("Velocidad_x", x);
+        anim.SetFloat("Velocidad_y", y); 
+   }
 // Mejoras para FixedUpdate
 
     public void  Corriendo_FixedUpdate(){
