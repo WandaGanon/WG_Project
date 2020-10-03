@@ -4,189 +4,90 @@ using UnityEngine;
 
 public class LogicaPersonaje1 : MonoBehaviour
 {
-    //correr
-    public int velCorrer;
-    public bool estoyAgachado;
-    //mover
-    public float velocidadMovimiento = 5.0f;
-    public float velocidadRotacion = 250.0f;
+    //Velocidad de caminar
+    public float velocidadCaminar = 5.0f;
+    //Multiplicador de correr x caminar ( 2 x 5.f )
+    public float velocidadCorrerX = 2.0f;
+    public float velocidadAgachadoX = 0.5f;
+    public float velocidadAgachadoCorrerX = 0.5f;
+    public float rotar = 200.0f;
+    public float x,y;
+    public float ForceJump = 8f;
+    public bool Can_jump;
     private Animator anim;
-    public float x, y;
+    private Rigidbody rb;
 
-    //salto
-    public Rigidbody rb;
-    public float fuerzaDeSalto = 8f;
-    public bool puedoSaltar;
-    //agacahar
-    public float velocidadInicial;
-    public float velocidadAgachado;
-
-    //golpe
-    public bool estoyAtacando;
-    public bool avanzoSolo;
-    public float impulsoDeGolpe = 10f;
-
-    //gravedad
-    public int fuerzaExtra = 0;
-    //raytrace
-    public LayerMask layers;
-    float rangoVision = 30;
-    float max ;
-    
-    RaycastHit hit;
-
+    // Start is called before the first frame update
     void Start()
     {
-        puedoSaltar = false;
+        Can_jump = false;
         anim = GetComponent<Animator>();
-
-        velocidadInicial = velocidadMovimiento;
-        velocidadAgachado = velocidadMovimiento * 0.5f;
+        rb = GetComponent<Rigidbody>();
     }
 
-    void FixedUpdate()
-    {
-        if (!estoyAtacando)
-        {
-            transform.Rotate(0, x * Time.deltaTime * velocidadRotacion, 0);
-            transform.Translate(0, 0, y * Time.deltaTime * velocidadMovimiento);
-        }
-
-        if(avanzoSolo)
-        {
-            rb.velocity=transform.forward * impulsoDeGolpe;
-        }
-    }
+    // Update is called once per frame
     void Update()
     {
-        if (Input.GetKey(KeyCode.LeftShift) && !estoyAgachado && puedoSaltar && !estoyAtacando)
-        {
-            velocidadMovimiento = velCorrer;
-            if (y > 0)
-            {
-                anim.SetBool("correr", true);
-            }
-            else
-            {
-                anim.SetBool("correr", false);
-            }
-        }
-        else
-        {
-            anim.SetBool("correr", false);
-
-            if (estoyAgachado)
-            {
-                velocidadMovimiento = velocidadAgachado;
-            }
-            else if (puedoSaltar)
-            {
-                velocidadMovimiento = velocidadInicial;
-            }
-        }
-
-        //
-        
+        // Obtener informacion de Eje X y Y del Axes
         x = Input.GetAxis("Horizontal");
         y = Input.GetAxis("Vertical");
-
-        if (Input.GetKeyDown(KeyCode.Return) && puedoSaltar && !estoyAtacando)
-        {
-            anim.SetTrigger("golpeo");
-            estoyAtacando = true;
-        }
-
-        anim.SetFloat("VelX", x);
-        anim.SetFloat("VelY", y);
-
-        DibujarRayo(hit, max);
-
-        if(puedoSaltar)
-        {
-            if (!estoyAtacando)
-            {
-                if (Input.GetKeyDown(KeyCode.Space))
-                {
-                    anim.SetBool("salte", true);
-                    rb.AddForce(new Vector3(0, fuerzaDeSalto, 0), ForceMode.Impulse);
-                }
-
-                if (Input.GetKey(KeyCode.LeftControl))
-                {
-                    anim.SetBool("agachado", true);
-                     //velocidadMovimiento = velocidadAgachado;
-
-                    // cambio de collider
-                   // colAgachado.enabled = true;
-                    //colParado.enabled = false;
-
-                   // cabeza.SetActive(true);
-                   // estoyAgachado = true;
-                }
-                
-                else
-                {
-                    anim.SetBool("agachado", false);
-                    //velocidadMovimiento = velocidadInicial;
-                }
-            }
-            anim.SetBool("tocoSuelo", true);
-        }
-        else
-        {
-            if ( hit.distance >= 0.12)
-            {
-            EstoyCayendo();
-            }
-            else if ( hit.distance <= 0.0084629){
-            EstoyCayendo();
-            Debug.Log(hit.distance);
-            Debug.Log(hit.distance);
-            }
-
-        }
-    }
-    public void EstoyCayendo()
-    {
-        //caer rapido
-        rb.AddForce(fuerzaExtra * Physics.gravity);
-
-
-        anim.SetBool("tocoSuelo", false);
-        anim.SetBool("salte", false);
-    }
-    public void DejeDeGolpear()
-    {
-        estoyAtacando = false;
-    }
-    public void AnavanzoSolo()
-    {
-        avanzoSolo = true;
-    }
-    public void DejoDeAvanzar()
-    {
-        avanzoSolo = false;
+        //Insertar informacion en Animator de los eje X y Y
+        anim.SetFloat("Velocidad_x", x);
+        anim.SetFloat("Velocidad_y", y); 
+        //Insertar informacion en Animator de "Run?"
+        Corriendo_Update();
+        //Insertar informacion en Animator de "Crouched?"
+        Agacharce_Update();
+        //Insertar informacion en Animator de salto y caida
+        if (Can_jump) { Saltar(); } else {  Falling(); }
     }
 
-    void DibujarRayo(RaycastHit hit,  float max)
-    {
-        // Vector3 direccion = new Vector3(Mathf.Cos(angulo * Mathf.Deg2Rad), 0, 0);
+    private void FixedUpdate() {
+        //Configuracion de la Rotacion de personaje
+        transform.Rotate(0, x * Time.deltaTime * rotar, 0); 
+        //Configuracion de la Velocidad cuando corra el personaje
+        Corriendo_FixedUpdate();
+       //Configuracion de la Velocidad cuando se agache el personaje
+        Agacharce_FixedUpdate();
+        
+    }
 
-        if (Physics. Raycast(transform.position, Vector3.down, out hit, rangoVision, layers))
-        {
-            Debug.DrawRay(transform.position, Vector3.down * hit.distance, Color.yellow);
-            //Debug.Log("Did Hit");
-            //Debug.Log(hit.distance);
+// Mejoras para Update
 
-            if(hit.distance > max){
-                Debug.Log(hit.distance);
-                max = hit.distance; 
-            }
-        }
-        else
+    public void  Corriendo_Update(){
+        if (Input.GetKeyDown(KeyCode.LeftShift)) { anim.SetBool("Run?", true); }
+        if (Input.GetKeyUp(KeyCode.LeftShift)) { anim.SetBool("Run?", false); }
+    }
+    
+    public void  Agacharce_Update(){
+        if (Input.GetKeyDown(KeyCode.LeftControl)) { anim.SetBool("Crouched?", true); }
+        if (Input.GetKeyUp(KeyCode.LeftControl)) { anim.SetBool("Crouched?", false); }
+    }
+    
+// Mejoras para FixedUpdate
+
+    public void  Corriendo_FixedUpdate(){
+        if (Input.GetKeyDown(KeyCode.LeftShift)) { transform.Translate(0 , 0, y * Time.deltaTime * velocidadCaminar * velocidadCorrerX); }
+        else{  transform.Translate(0 , 0, y * Time.deltaTime * velocidadCaminar); }
+    }
+    public void  Agacharce_FixedUpdate(){
+        if (Input.GetKeyDown(KeyCode.LeftControl)) { transform.Translate(0 , 0, y * Time.deltaTime * velocidadCaminar * velocidadAgachadoX); }
+        else{  transform.Translate(0 , 0, y * Time.deltaTime * velocidadCaminar); }
+    }
+
+// funciones de Salto
+    public void Saltar(){
+        if (Input.GetKeyDown(KeyCode.Space))
         {
-            Debug.DrawRay(transform.position, Vector3.down * rangoVision, Color.white);
-            Debug.Log("Did not Hit");
+        anim.SetBool("Jump?", true);
+        rb.AddForce(new Vector3(0,ForceJump,0),ForceMode.Impulse );
         }
+        anim.SetBool("Suelo?", true);
+    }
+
+// Funcion de caida
+    public void Falling(){
+        anim.SetBool("Suelo?", false);
+        anim.SetBool("Jump?", false);
     }
 }
