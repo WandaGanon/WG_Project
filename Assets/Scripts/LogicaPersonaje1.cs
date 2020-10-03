@@ -9,13 +9,17 @@ public class LogicaPersonaje1 : MonoBehaviour
     //Multiplicador de correr x caminar ( 2 x 5.f )
     public float velocidadCorrerX = 2.0f;
     public float velocidadAgachadoX = 0.5f;
-    public float velocidadAgachadoCorrerX = 0.5f;
+    // public float velocidadAgachadoCorrerX = 0.5f;
     public float rotar = 200.0f;
     public float x,y;
     public float ForceJump = 8f;
     public bool Can_jump;
     private Animator anim;
     private Rigidbody rb;
+
+/*
+    crear codigo para estar stay o afk
+*/
 
     // Start is called before the first frame update
     void Start()
@@ -67,11 +71,11 @@ public class LogicaPersonaje1 : MonoBehaviour
 // Mejoras para FixedUpdate
 
     public void  Corriendo_FixedUpdate(){
-        if (Input.GetKeyDown(KeyCode.LeftShift)) { transform.Translate(0 , 0, y * Time.deltaTime * velocidadCaminar * velocidadCorrerX); }
+        if (Input.GetKey(KeyCode.LeftShift)) {transform.Translate(0 , 0, y * Time.deltaTime * velocidadCaminar * velocidadCorrerX); }
         else{  transform.Translate(0 , 0, y * Time.deltaTime * velocidadCaminar); }
     }
     public void  Agacharce_FixedUpdate(){
-        if (Input.GetKeyDown(KeyCode.LeftControl)) { transform.Translate(0 , 0, y * Time.deltaTime * velocidadCaminar * velocidadAgachadoX); }
+        if (Input.GetKey(KeyCode.LeftControl)) { transform.Translate(0 , 0, y * Time.deltaTime * velocidadCaminar * velocidadAgachadoX); }
         else{  transform.Translate(0 , 0, y * Time.deltaTime * velocidadCaminar); }
     }
 

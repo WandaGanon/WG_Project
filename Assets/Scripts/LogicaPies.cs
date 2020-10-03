@@ -4,12 +4,11 @@ using UnityEngine;
 
 public class LogicaPies : MonoBehaviour
 {
-    public LogicaPersonaje1 data1;
+    public LogicaPersonaje1 pies;
     void Start()
     {
     
     }
-
     // Update is called once per frame
     void Update()
     {
@@ -17,10 +16,10 @@ public class LogicaPies : MonoBehaviour
     }
     private void OnTriggerStay(Collider other) 
     {
-        data1.Can_jump = true;
+        pies.Can_jump = true;
     }
     private void OnTriggerExit(Collider other) 
     {
-        data1.Can_jump = false;
+        pies.Can_jump = false;
     }
 }
