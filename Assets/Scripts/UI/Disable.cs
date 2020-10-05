@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Disable : MonoBehaviour
 {
-    [Header("Compass Option")]
+    [Header("Compass Opciones")]
     //ELEMENTOS DEL COMPASS CLASSIC
     [Tooltip("Tecla para activar o Desactivar Compass Classic")]
     public KeyCode CompassClassicKey = KeyCode.U;

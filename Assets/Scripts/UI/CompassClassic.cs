@@ -13,6 +13,7 @@ public class CompassClassic : MonoBehaviour
     }
     public void CompassClassicF()
     {
+        //rota en Z la imagen segun la posicion de Y del jugador
         vector.z = player.eulerAngles.y;
         transform.localEulerAngles = vector;
     }
