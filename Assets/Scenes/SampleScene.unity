@@ -1789,6 +1789,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Personaje 1
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 6f9fa0ed2c8a93046a926b1f501aff77, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5465940246521907071, guid: 6f9fa0ed2c8a93046a926b1f501aff77, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
