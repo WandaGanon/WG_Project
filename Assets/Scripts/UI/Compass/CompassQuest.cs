@@ -27,22 +27,31 @@ public class CompassQuest : MonoBehaviour
     //-----libreria de objetos que puede reconocer la brujula-----
     [Header("Libreria de objetos")]
     [Tooltip("Agregar QuestMarkers a la brujula")]
-    public QuestMarker one;
-    public QuestMarker two;
-    public QuestMarker three;
-
+    //public string itemsTag = "Item";
+    public QuestMarker Item1;
+    public QuestMarker Item2;
+    public QuestMarker Item3;
+    public QuestMarker Item4;  
+    //ArrayItems Pibote;
     private void Start() 
     {
         // es la unidad que usaran los questmarkers basandose en el tamaño del compass
         compassUnit = compassImage.rectTransform.rect.width / 360f;
+/*         var all = Pibote.allchildren;
+        Debug.Log(all);
+        Debug.Log(all[1]); */
 
         // Lista de objetos que reconoce la brujula
-        AddQuestMarker(one);
-        AddQuestMarker(two);
-        AddQuestMarker(three);
+        AddQuestMarker(Item1);
+        AddQuestMarker(Item2);
+        AddQuestMarker(Item3);
+        AddQuestMarker(Item4);   
     }
+
     private void Update()
-    {
+    {   
+        //ItemsQuest = GameObject.FindGameObjectsWithTag("item");
+        
         //----- BRUJULA QUEST SIN ICONOS SOLO NECESITA DEL CompastQuestF() y nada mas-----
         CompastQuestF();
          //----- CODIGO DE QUESTMARKER-----
@@ -56,6 +65,7 @@ public class CompassQuest : MonoBehaviour
             marker.image.rectTransform.localScale = Vector3.one * scale;
         }
     }
+
     //----- CODIGO ESCENCIAL DE LA BRUJUGA QUEST -----
     public void CompastQuestF()
     {
@@ -80,4 +90,5 @@ public class CompassQuest : MonoBehaviour
 
         return new Vector2(compassUnit * angle, 0f);
     }
+       
 }

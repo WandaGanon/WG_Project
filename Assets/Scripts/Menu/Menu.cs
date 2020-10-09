@@ -21,6 +21,7 @@ public class Menu : MonoBehaviour
     [Header("Ejecutar Opciones")]
     public KeyCode PauseKey = KeyCode.T;
     public GameObject PuaseMenu;
+
     private void Start() 
     {
         PuaseMenu.gameObject.SetActive (false);
@@ -53,28 +54,11 @@ public class Menu : MonoBehaviour
         else
             Time.timeScale = 1;
     }
-  
     public void ExitGame()
     {
         UnityEngine.Debug.LogError("Exit Game");
         Application.Quit(); 
     }
-    /* MENU
-   public void LoadPlay()
-    {
-        SceneManager.LoadScene(play);
-    }
-    public void LoadSettings()
-    {
-        SceneManager.LoadScene(settings);
-    }
-    public void LoadExit()
-    {
-        SceneManager.LoadScene(exit);
-    }
-    public void ReturnToMenu()
-    {
-        SceneManager.LoadScene(menu);
-    }
-*/
+    
+
 }

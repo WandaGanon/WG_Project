@@ -5,6 +5,14 @@
 [Tooltip("Velocidad de caminar")]
 
 
+## Canales utiles
+
+https://www.youtube.com/channel/UCro-yh_yhBpMALEG6FTD1FQ/videos
+
+---
+
+
+
 ### cosas utiles
 
 como crear una pantalla de settings (Mar 22, 2019)
@@ -90,8 +98,6 @@ https://www.youtube.com/watch?v=usKtSdOtWHU
 coldown (Nov 17, 2018)
 
 https://www.youtube.com/watch?v=gE4yKy4N6ws
-
-
 
 enable o disable un game object
 
