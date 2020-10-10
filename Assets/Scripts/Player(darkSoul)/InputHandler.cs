@@ -11,16 +11,17 @@ namespace SG{
         public float mouseY;
         PlayerControls inputActions;
         Vector2 movementInput;
-        Vector2 camaraInput;
+        Vector2 cameraInput;
 
-
+//RightStickVertical
+//RightStickHorizontal
         public  void OnEnable() 
         {
             if (inputActions == null)
             {
                 inputActions = new PlayerControls();
-                inputActions.PlayerMovement.Movent.performed += inputActions => movementInput = inputActions.ReadValue<Vector2>();
-                inputActions.PlayerMovement.Camara.performed += i => camaraInput = i.ReadValue<Vector2>();
+                inputActions.PlayerMovement.Movement.performed += inputActions => movementInput = inputActions.ReadValue<Vector2>(); 
+                inputActions.PlayerMovement.Camera.performed += i => cameraInput = i.ReadValue<Vector2>();
             }
             inputActions.Enable();
         }
@@ -33,13 +34,13 @@ namespace SG{
             MoveInput(delta);
         }
 
-        private void MoveInput(float delta){
+        private void MoveInput(float delta)
+        {
             horizontal = movementInput.x;
             vertical = movementInput.y;
             moveAmount = Mathf.Clamp01(Mathf.Abs(horizontal) + Mathf.Abs(vertical));
-            mouseX = camaraInput.x;
-            mouseY = camaraInput.y;
+            mouseX = cameraInput.x;
+            mouseY = cameraInput.y;
         }
-
     }
 }

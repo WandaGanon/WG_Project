@@ -2,18 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SG{
+namespace SG
+{
     public class PlayerLocomotion : MonoBehaviour
     {
-        Transform camaraObject;
-        InputHandler InputHandler;
+        Transform cameraObject;
+        InputHandler inputHandler;
         Vector3 moveDirection;
         [HideInInspector]
         public Transform myTransform;
         [HideInInspector]
-        public AnimatorHandler AnimatorHandler;
+        public AnimatorHandler animatorHandler;
         public new Rigidbody rigidbody;
-        public GameObject normalCamara;
+        public GameObject normalCamera;
          
         [Header("Stasts ")]
         [SerializeField]
@@ -21,23 +22,24 @@ namespace SG{
         [SerializeField]
         float rotationSpeed = 10f;
 
-        // Start is called before the first frame update
         void Start()
         {   
             rigidbody = GetComponent<Rigidbody>();
-            InputHandler =  GetComponent<InputHandler>();
-            AnimatorHandler =  GetComponent<AnimatorHandler>();
-            camaraObject = Camera.main.transform;
+            inputHandler =  GetComponent<InputHandler>();
+            animatorHandler =  GetComponentInChildren<AnimatorHandler>();
+            cameraObject = Camera.main.transform;
             myTransform = transform;
-            AnimatorHandler.Initialize();
+            //animatorHandler.Initialize();
         }
-
-        public void Update() {
+        public void Update() 
+        {
             float delta = Time.deltaTime;
 
-            InputHandler.TickInput(delta);
-            moveDirection = camaraObject.forward * InputHandler.vertical;
-            moveDirection += camaraObject.right * InputHandler.horizontal;
+            inputHandler.TickInput(delta);
+
+            moveDirection = cameraObject.forward * inputHandler.vertical;
+            moveDirection += cameraObject.right * inputHandler.horizontal;
+            moveDirection.Normalize();
 
             float speed = movementSpeed;
             moveDirection *= speed;
@@ -45,7 +47,7 @@ namespace SG{
             Vector3 projectedVelocity = Vector3.ProjectOnPlane(moveDirection, normalVector);
             rigidbody.velocity = projectedVelocity;
 
-            if (AnimatorHandler.canRotate)
+            if (animatorHandler.canRotate)
             {
                 Handlerotation(delta);
             }
@@ -56,20 +58,20 @@ namespace SG{
         Vector3 normalVector;
         Vector3 targetPosition;
 
-        private void Handlerotation(float delta){
+        private void Handlerotation(float delta)
+        {
             Vector3 targetDir = Vector3.zero;
-            float moveOverride = InputHandler.moveAmount;
+            float moveOverride = inputHandler.moveAmount;
 
-            targetDir = camaraObject.forward * InputHandler.vertical;
-            targetDir += camaraObject.right * InputHandler.horizontal;
+            targetDir = cameraObject.forward * inputHandler.vertical;
+            targetDir += cameraObject.right * inputHandler.horizontal;
 
             targetDir.Normalize();
             targetDir.y = 0;
-            if (targetDir == Vector3.zero)
-            {
-                targetDir = myTransform.forward; 
-            }
 
+            if (targetDir == Vector3.zero)
+                targetDir = myTransform.forward; 
+            
             float rs = rotationSpeed;
 
             Quaternion tr = Quaternion.LookRotation(targetDir);
@@ -77,6 +79,8 @@ namespace SG{
 
             myTransform.rotation = targetRotation;
         }
+
         #endregion
+
     }
 }
