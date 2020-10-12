@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using System;
 using UnityEngine.SceneManagement;
+using System;
 
 public class Menu : MonoBehaviour
 {
@@ -34,11 +34,17 @@ public class Menu : MonoBehaviour
             {
                 Pause();
                 PuaseMenu.gameObject.SetActive (true);
+                //activar cursor
+                Cursor.lockState = CursorLockMode.None; 
+                Cursor.visible = true;
             }
         else if (Input.GetKeyDown(PauseKey) && PuaseMenu.activeSelf == true)
             {
                 Pause();
                 PuaseMenu.gameObject.SetActive (false);
+                //desactivar cursor
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
             }
     }
     public void Timer()
@@ -59,6 +65,9 @@ public class Menu : MonoBehaviour
         UnityEngine.Debug.LogError("Exit Game");
         Application.Quit(); 
     }
-    
+    public void PauseMenu()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+    }
 
 }
