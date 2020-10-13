@@ -2,72 +2,59 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 using System;
 
 public class Menu : MonoBehaviour
 {
-    /* MENU
-    public string play;
-    public string settings;
-    public string exit;
-    public string menu;
-    */
-    [Header("Tiempo Opciones")]
-    [Tooltip("Asignar Text para mostrar la hora local")]
-    public Text Tiempo;
-    string TiempoString;
     //ELEMENTOS Generales
     [Header("Ejecutar Opciones")]
-    public KeyCode PauseKey = KeyCode.T;
-    public GameObject PuaseMenu;
-
+    public KeyCode PauseKey = KeyCode.Escape;
+    public GameObject PauseMenu;
     private void Start() 
     {
-        PuaseMenu.gameObject.SetActive (false);
+        if (PauseMenu.activeSelf == true && Time.timeScale == 0) 
+        {
+            PauseMenu.gameObject.SetActive (false);
+            Time.timeScale = 1;
+        }
+        else
+        {
+            PauseMenu.gameObject.SetActive (false);
+        }
     }
     void Update()
     {
-        Timer();
-
-        if (Input.GetKeyDown(PauseKey) && PuaseMenu.activeSelf == false )
+        if (Input.GetKeyDown(PauseKey) && PauseMenu.activeSelf == false )
             {
                 Pause();
-                PuaseMenu.gameObject.SetActive (true);
+                PauseMenu.gameObject.SetActive (true);
                 //activar cursor
                 Cursor.lockState = CursorLockMode.None; 
                 Cursor.visible = true;
             }
-        else if (Input.GetKeyDown(PauseKey) && PuaseMenu.activeSelf == true)
+        else if (Input.GetKeyDown(PauseKey) && PauseMenu.activeSelf == true)
             {
                 Pause();
-                PuaseMenu.gameObject.SetActive (false);
+                PauseMenu.gameObject.SetActive (false);
                 //desactivar cursor
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
             }
     }
-    public void Timer()
-    {
-        DateTime now = DateTime.Now;
-        TiempoString = DateTime.Now.ToString("hh:mm:ss");
-        Tiempo.text = TiempoString;
-    }
     public void Pause()
     {
+        // 1 es igual al tiempo normal que funciona unity
+        // 0 es cuando se detiene el tiempo, se detiene todo lo que sea animado tambien
         if (Time.timeScale == 1)
             Time.timeScale = 0;
         else
             Time.timeScale = 1;
     }
-    public void ExitGame()
+    public void Continue()
     {
-        UnityEngine.Debug.LogError("Exit Game");
-        Application.Quit(); 
+        Pause();
+        PauseMenu.gameObject.SetActive (false);
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
-    public void PauseMenu()
-    {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
-    }
-
 }
