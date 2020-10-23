@@ -17,6 +17,9 @@ public class PlayerNuevo : MonoBehaviour
     public Camera mainCamera;
     private Vector3 camForward;
     private Vector3 camRight;
+    public float fallVelocity;
+    public float jumpForce;
+
 
     void Start()
     {
@@ -43,6 +46,8 @@ public class PlayerNuevo : MonoBehaviour
 
         SetGravity();
 
+        PlayerJump();
+
         Player.Move( moverPlayer * Time.deltaTime);
         
     }
@@ -54,13 +59,31 @@ public class PlayerNuevo : MonoBehaviour
 
         camForward.y =  0;
         camRight.y = 0;
-        
+
         camForward = camForward.normalized;
         camRight = camRight.normalized;
+    }
+
+    void PlayerJump(){
+        if (Player.isGrounded && Input.GetKeyDown(KeyCode.Space))
+        {
+            fallVelocity = jumpForce;
+            moverPlayer.y = fallVelocity;
+        }
 
     }
+
     void SetGravity(){
-        moverPlayer.y = -gravedad * Time.deltaTime;
+        if (Player.isGrounded)
+        {
+            fallVelocity = -gravedad * Time.deltaTime;
+            moverPlayer.y = fallVelocity;
+        }
+        else
+        {
+            fallVelocity -= gravedad * Time.deltaTime;
+            moverPlayer.y = fallVelocity;
+        }
     }
 
     private void FixedUpdate() {
