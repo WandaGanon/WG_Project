@@ -8,7 +8,12 @@ public class PlayerNuevo : MonoBehaviour
 //https://www.youtube.com/watch?v=Dp_MFvT_VIw&list=PLOc9rHNEUHlyryuY0PvipHTXyL2mBij9-&index=2&ab_channel=GamerGarage
     public float h;
     public float v;
+
     private Vector3 playerInput;
+
+    public bool isOnSlope = false;
+    private Vector3 hitNormal;
+        
     private Vector3 moverPlayer;
     public CharacterController Player;
     public float Velocidad = 0.1f;
@@ -19,8 +24,9 @@ public class PlayerNuevo : MonoBehaviour
     private Vector3 camRight;
     public float fallVelocity;
     public float jumpForce;
+    public float slideVelocity = 7f;
 
-
+    public float slopeForceDown = -10f;
     void Start()
     {
         Player = GetComponent<CharacterController>();
@@ -84,8 +90,22 @@ public class PlayerNuevo : MonoBehaviour
             fallVelocity -= gravedad * Time.deltaTime;
             moverPlayer.y = fallVelocity;
         }
+        SlideDown();
     }
 
-    private void FixedUpdate() {
+    public void SlideDown(){
+        isOnSlope = Vector3.Angle(Vector3.up, hitNormal) >= Player.slopeLimit;
+
+        if (isOnSlope == true)
+        {
+             moverPlayer.x += ((1f - hitNormal.y) * hitNormal.x) * slideVelocity;
+             moverPlayer.z += ((1f - hitNormal.y) * hitNormal.z) * slideVelocity;
+
+            moverPlayer.y += slopeForceDown;
+        }
+    }
+
+    private void OnControllerColliderHit(ControllerColliderHit hit) {
+        hitNormal  = hit.normal;
     }
 }
