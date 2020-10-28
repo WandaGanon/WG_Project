@@ -3517,13 +3517,13 @@ CharacterController:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Height: 1.7
-  m_Radius: 0.27
+  m_Height: 1.73
+  m_Radius: 0.22
   m_SlopeLimit: 45
-  m_StepOffset: 0.3
+  m_StepOffset: 0.09
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0.87, z: 0}
+  m_Center: {x: 0, y: 0.88, z: 0}
 --- !u!114 &450081953
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3540,6 +3540,8 @@ MonoBehaviour:
   v: 0
   Player: {fileID: 0}
   Velocidad: 4
+  VelocidadCorrer: 2
+  VelocidadAgachado: 0.5
   gravedad: 9.8
   slopeForceDown: -10
   mainCamera: {fileID: 506033405}

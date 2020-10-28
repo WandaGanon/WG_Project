@@ -23,6 +23,9 @@ public class PlayerNuevo : MonoBehaviour
     private Vector3 moverPlayer;
     public CharacterController Player;
     public float Velocidad = 0.1f;
+    public float VelocidadCorrer = 2f;
+    public float VelocidadAgachado = 0.5f;
+
     public float gravedad = 9.8f;
     public float slopeForceDown = -10f;
     public Camera mainCamera;
@@ -49,7 +52,6 @@ public class PlayerNuevo : MonoBehaviour
     {
         h = Input.GetAxis("Horizontal");
         v = Input.GetAxis("Vertical"); 
-
         Idle();
 
         playerInput = new Vector3(h, 0, v);
@@ -60,9 +62,10 @@ public class PlayerNuevo : MonoBehaviour
         playerInput = Vector3.ClampMagnitude(playerInput, 1);
 
         camDireccion();
+
         moverPlayer = playerInput.x * camRight + playerInput.z * camForward;
 
-        moverPlayer = moverPlayer * Velocidad;
+        MovimientoJugador();
 
         Player.transform.LookAt(Player.transform.position + moverPlayer);
 
@@ -71,9 +74,28 @@ public class PlayerNuevo : MonoBehaviour
         PlayerJump();
 
         Player.Move( moverPlayer * Time.deltaTime);
-        
     }
 
+    void MovimientoJugador(){
+        // Velovidad para Correr
+        if (Player.isGrounded && Input.GetKey(KeyCode.LeftShift))
+        { moverPlayer = moverPlayer * Velocidad * VelocidadCorrer; }
+        // Velocidad agachado
+        else if(Player.isGrounded && Input.GetKey(KeyCode.LeftControl))
+        { 
+
+            moverPlayer = moverPlayer * Velocidad * VelocidadAgachado; 
+            Player.height = 0.9f;
+        }
+        // Velocidad Para Caminar
+        else{ moverPlayer = moverPlayer * Velocidad; }
+
+            //Cuando no este agachado
+            if(Input.GetKeyUp(KeyCode.LeftControl))
+            {
+            Player.height = 1.73f;
+            }
+    }
     void camDireccion(){
 
         camForward = mainCamera.transform.forward;
