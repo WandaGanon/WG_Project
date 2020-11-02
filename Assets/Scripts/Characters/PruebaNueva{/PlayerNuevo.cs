@@ -36,7 +36,7 @@ public class PlayerNuevo : MonoBehaviour
     public float slideVelocity = 7f;
 
     [Header("Verificar estado del Player")]
-    public bool suelo_real;
+    public bool floor;
     public bool waitIdle;
     public bool isOnSlope = false;
     private Animator anim;
@@ -45,6 +45,8 @@ public class PlayerNuevo : MonoBehaviour
     {
         Player = GetComponent<CharacterController>();
         anim = GetComponent<Animator>();
+        anim.SetBool("jump?",true);
+
     }
 
     // Update is called once per frame
@@ -79,16 +81,23 @@ public class PlayerNuevo : MonoBehaviour
     void MovimientoJugador(){
         // Velovidad para Correr
         if (Player.isGrounded && Input.GetKey(KeyCode.LeftShift))
-        { moverPlayer = moverPlayer * Velocidad * VelocidadCorrer; }
+        { 
+            anim.SetBool("run?", true);
+            moverPlayer = moverPlayer * Velocidad * VelocidadCorrer; 
+        }
         // Velocidad agachado
         else if(Player.isGrounded && Input.GetKey(KeyCode.LeftControl))
         { 
-
+            anim.SetBool("bend?", true);
             moverPlayer = moverPlayer * Velocidad * VelocidadAgachado; 
             Player.height = 0.9f;
         }
         // Velocidad Para Caminar
-        else{ moverPlayer = moverPlayer * Velocidad; }
+        else{ 
+            moverPlayer = moverPlayer * Velocidad; 
+            anim.SetBool("run?", false);
+            anim.SetBool("bend?", false);
+        }
 
             //Cuando no este agachado
             if(Input.GetKeyUp(KeyCode.LeftControl))
@@ -96,6 +105,7 @@ public class PlayerNuevo : MonoBehaviour
             Player.height = 1.73f;
             }
     }
+
     void camDireccion(){
 
         camForward = mainCamera.transform.forward;
@@ -110,26 +120,29 @@ public class PlayerNuevo : MonoBehaviour
 
     void PlayerJump(){
         if (Player.isGrounded && Input.GetKeyDown(KeyCode.Space)) {
+            anim.SetBool("jump?",false);
             fallVelocity = jumpForce;
             moverPlayer.y = fallVelocity;
         }
-
-        if (Player.isGrounded) { suelo_real = true; }
-        else { suelo_real = false; }
-
     }
 
     void SetGravity(){
         if (Player.isGrounded)
         {
+            floor = true; 
             fallVelocity = -gravedad * Time.deltaTime;
             moverPlayer.y = fallVelocity;
+            anim.SetBool("jump?",true);
+
         }
         else
         {
             fallVelocity -= gravedad * Time.deltaTime;
             moverPlayer.y = fallVelocity;
+            floor = false; 
         }
+
+        anim.SetBool("floor?",floor);
         SlideDown();
     }
 
@@ -143,15 +156,15 @@ public class PlayerNuevo : MonoBehaviour
 
             moverPlayer.y += slopeForceDown;
         }
+
+        anim.SetBool("Slide?",isOnSlope);
     }
 
     public void  Idle(){
-        if(h == 0  && v == 0){ anim.SetBool("waitIdle?", true);
-           waitIdle = anim.GetBool("waitIdle?");
-        }
-        else{ anim.SetBool("waitIdle?", false);
-           waitIdle = anim.GetBool("waitIdle?");
-        }
+        if(h == 0  && v == 0){ anim.SetBool("waitIdle?", true); }
+        else{ anim.SetBool("waitIdle?", false); }
+
+        waitIdle = anim.GetBool("waitIdle?");
     }   
 
     private void OnControllerColliderHit(ControllerColliderHit hit) {
@@ -159,7 +172,7 @@ public class PlayerNuevo : MonoBehaviour
     }
 
     public void InjectEjesPrincipales(float x, float y){
-        anim.SetFloat("Velocidad_x", v);
+        anim.SetFloat("Velocidad_x", x);
         anim.SetFloat("Velocidad_y", y); 
    }
 }
