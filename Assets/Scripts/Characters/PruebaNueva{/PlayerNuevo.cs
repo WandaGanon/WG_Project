@@ -41,6 +41,12 @@ public class PlayerNuevo : MonoBehaviour
     public bool isOnSlope = false;
     private Animator anim;
  
+    public bool firstButtonPressed = true;
+    public bool reset = true;
+
+    public  float timeOfFirstButton = 0;
+    public  float clickdelay = 0.5f;
+     public  float t0, moveSpeed;
     void Start()
     {
         Player = GetComponent<CharacterController>();
@@ -55,6 +61,17 @@ public class PlayerNuevo : MonoBehaviour
         h = Input.GetAxis("Horizontal");
         v = Input.GetAxis("Vertical"); 
         Idle();
+
+        runRollVerificar();
+
+        if ( Input.GetKey(KeyCode.E) )
+        {
+            anim.SetBool("roll?", true);
+        }
+        else
+        {
+            anim.SetBool("roll?", false);
+        }
 
         playerInput = new Vector3(h, 0, v);
 
@@ -84,6 +101,8 @@ public class PlayerNuevo : MonoBehaviour
         { 
             anim.SetBool("run?", true);
             moverPlayer = moverPlayer * Velocidad * VelocidadCorrer; 
+
+
         }
         // Velocidad agachado
         else if(Player.isGrounded && Input.GetKey(KeyCode.LeftControl))
@@ -175,4 +194,32 @@ public class PlayerNuevo : MonoBehaviour
         anim.SetFloat("Velocidad_x", x);
         anim.SetFloat("Velocidad_y", y); 
    }
+
+ 
+    public void runRollVerificar()
+    {
+         if(Input.GetKeyDown(KeyCode.LeftShift) && firstButtonPressed) 
+         {
+             if(Time.time - timeOfFirstButton < 0.5f) {
+                 Debug.Log("DoubleClicked");
+             } else {
+                 Debug.Log("Too late");
+             }
+ 
+             reset = true;
+         }
+ 
+         if(Input.GetKeyDown(KeyCode.LeftShift) && !firstButtonPressed) {
+             firstButtonPressed = true;
+             timeOfFirstButton = Time.time;
+         }
+ 
+         if(reset) {
+             firstButtonPressed = false;
+             reset = false;
+         }
+
+    }
+
+
 }
