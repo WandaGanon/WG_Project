@@ -104,6 +104,7 @@ public class LogicaPersonaje1 : MonoBehaviour
         if (Input.GetKey(KeyCode.LeftShift)) {transform.Translate(0 , 0, y * Time.deltaTime * velocidadCaminar * velocidadCorrerX); }
         else{  transform.Translate(0 , 0, y * Time.deltaTime * velocidadCaminar); }
     }
+    
     public void  Agacharce_FixedUpdate(){
         if (Input.GetKey(KeyCode.LeftControl)) { transform.Translate(0 , 0, y * Time.deltaTime * velocidadCaminar * velocidadAgachadoX); }
         else{  transform.Translate(0 , 0, y * Time.deltaTime * velocidadCaminar); }

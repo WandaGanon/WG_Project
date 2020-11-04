@@ -23,6 +23,9 @@ public class PlayerNuevo : MonoBehaviour
     private Vector3 moverPlayer;
     public CharacterController Player;
     public float Velocidad = 0.1f;
+    public float VelocidadCorrer = 2f;
+    public float VelocidadAgachado = 0.5f;
+
     public float gravedad = 9.8f;
     public float slopeForceDown = -10f;
     public Camera mainCamera;
@@ -33,15 +36,56 @@ public class PlayerNuevo : MonoBehaviour
     public float slideVelocity = 7f;
 
     [Header("Verificar estado del Player")]
-    public bool suelo_real;
+    public bool floor;
     public bool waitIdle;
     public bool isOnSlope = false;
     private Animator anim;
  
+    public bool firstButtonPressed = true;
+    public bool reset = true;
+
+    public  float timeOfFirstButton = 0;
+    public  float clickdelay = 0.5f;
+     public  float t0, moveSpeed;
+
+    [Header("Colicion de la cabeza")]
+    public GameObject cabeza;
+    public LogicaCabeza logicaCabeza;
+
+
+/*
+    - problemas al bajar las escaleras 
+    *solucion posible crear o usar un codigo de pies que si el personaje 
+    esta tocando suelo con x profuncidad no realice animacion de caida
+    
+    -porblema al correr o caminar por los cubos con fisica
+    *solucion parecida a la de los escalones.
+
+    -problemas al agacharse y tratar que se mantenga agachado cuando este por debajo de algo
+    * Solucion revisar este video https://www.youtube.com/watch?v=a8d_q7sxodI&ab_channel=DonPachi
+
+    -problema que se produce al saltar mirando una pared, muestra animacion de caida.
+    *Solucion podria servir solucion de pies.
+    
+    -Fea animacion de correr a saltar, caer y tocar suelo
+    * podria agregarse una transicion adicional.
+
+    -Optimizar el codigo
+    * Solo viendo lo util de lo que no y tratando de compactar y documentar mas el codigo
+
+    -------------------------------------------------------
+    cosas a rescatar
+    el boton E esta para realizar RODAR
+    el Correr si lo apretar varias veces verifica si se realizo el doble clic con un mensaje en consola. (Se puede usar a futuro)
+
+*/
     void Start()
     {
         Player = GetComponent<CharacterController>();
         anim = GetComponent<Animator>();
+        anim.SetBool("jump?",true);
+        cabeza.SetActive(false);
+
     }
 
     // Update is called once per frame
@@ -49,8 +93,18 @@ public class PlayerNuevo : MonoBehaviour
     {
         h = Input.GetAxis("Horizontal");
         v = Input.GetAxis("Vertical"); 
-
         Idle();
+
+        runRollVerificar();
+
+        if ( Input.GetKey(KeyCode.E) )
+        {
+            anim.SetBool("roll?", true);
+        }
+        else
+        {
+            anim.SetBool("roll?", false);
+        }
 
         playerInput = new Vector3(h, 0, v);
 
@@ -60,9 +114,10 @@ public class PlayerNuevo : MonoBehaviour
         playerInput = Vector3.ClampMagnitude(playerInput, 1);
 
         camDireccion();
+
         moverPlayer = playerInput.x * camRight + playerInput.z * camForward;
 
-        moverPlayer = moverPlayer * Velocidad;
+        MovimientoJugador();
 
         Player.transform.LookAt(Player.transform.position + moverPlayer);
 
@@ -71,7 +126,50 @@ public class PlayerNuevo : MonoBehaviour
         PlayerJump();
 
         Player.Move( moverPlayer * Time.deltaTime);
-        
+    }
+
+    void MovimientoJugador(){
+        // Velovidad para Correr
+        if (Player.isGrounded && Input.GetKey(KeyCode.LeftShift))
+        { 
+            anim.SetBool("run?", true);
+            moverPlayer = moverPlayer * Velocidad * VelocidadCorrer; 
+
+
+        }
+        // Velocidad agachado
+        else if(Player.isGrounded && Input.GetKey(KeyCode.LeftControl))
+        { 
+            cabeza.SetActive(true);
+            anim.SetBool("bend?", true);
+            moverPlayer = moverPlayer * Velocidad * VelocidadAgachado; 
+            // Variable que se modifica al personaje con el fin de cambiar su colicion
+            Player.height = 0.9f;
+            Player.center = new Vector3(0, 0.52f, 0);
+
+        }
+        // Velocidad Para Caminar
+        else{ 
+            moverPlayer = moverPlayer * Velocidad; 
+            anim.SetBool("run?", false); 
+        }
+
+            //Cuando no este agachado
+            if(Input.GetKeyUp(KeyCode.LeftControl))
+            {
+                //se realiza pregunta a cabeza si tiene o no algun objeto arriba de este
+                if(logicaCabeza.contadorOnTrigger <= 0){
+                    cabeza.SetActive(false);
+                    anim.SetBool("bend?", false);
+                    cabeza.SetActive(false);
+                    // Variable que se modifica al personaje con el fin de cambiar su colicion
+                    Player.height = 1.73f;
+                    Player.center = new Vector3(0, 0.88f, 0);
+                }
+                else{
+                anim.SetBool("bend?", true);
+                }
+            }
     }
 
     void camDireccion(){
@@ -88,26 +186,29 @@ public class PlayerNuevo : MonoBehaviour
 
     void PlayerJump(){
         if (Player.isGrounded && Input.GetKeyDown(KeyCode.Space)) {
+            anim.SetBool("jump?",false);
             fallVelocity = jumpForce;
             moverPlayer.y = fallVelocity;
         }
-
-        if (Player.isGrounded) { suelo_real = true; }
-        else { suelo_real = false; }
-
     }
 
     void SetGravity(){
         if (Player.isGrounded)
         {
+            floor = true; 
             fallVelocity = -gravedad * Time.deltaTime;
             moverPlayer.y = fallVelocity;
+            anim.SetBool("jump?",true);
+
         }
         else
         {
             fallVelocity -= gravedad * Time.deltaTime;
             moverPlayer.y = fallVelocity;
+            floor = false; 
         }
+
+        anim.SetBool("floor?",floor);
         SlideDown();
     }
 
@@ -121,15 +222,15 @@ public class PlayerNuevo : MonoBehaviour
 
             moverPlayer.y += slopeForceDown;
         }
+
+        anim.SetBool("Slide?",isOnSlope);
     }
 
     public void  Idle(){
-        if(h == 0  && v == 0){ anim.SetBool("waitIdle?", true);
-           waitIdle = anim.GetBool("waitIdle?");
-        }
-        else{ anim.SetBool("waitIdle?", false);
-           waitIdle = anim.GetBool("waitIdle?");
-        }
+        if(h == 0  && v == 0){ anim.SetBool("waitIdle?", true); }
+        else{ anim.SetBool("waitIdle?", false); }
+
+        waitIdle = anim.GetBool("waitIdle?");
     }   
 
     private void OnControllerColliderHit(ControllerColliderHit hit) {
@@ -137,7 +238,35 @@ public class PlayerNuevo : MonoBehaviour
     }
 
     public void InjectEjesPrincipales(float x, float y){
-        anim.SetFloat("Velocidad_x", v);
+        anim.SetFloat("Velocidad_x", x);
         anim.SetFloat("Velocidad_y", y); 
    }
+
+ 
+    public void runRollVerificar()
+    {
+         if(Input.GetKeyDown(KeyCode.LeftShift) && firstButtonPressed) 
+         {
+             if(Time.time - timeOfFirstButton < 0.5f) {
+                 Debug.Log("DoubleClicked");
+             } else {
+                 Debug.Log("Too late");
+             }
+ 
+             reset = true;
+         }
+ 
+         if(Input.GetKeyDown(KeyCode.LeftShift) && !firstButtonPressed) {
+             firstButtonPressed = true;
+             timeOfFirstButton = Time.time;
+         }
+ 
+         if(reset) {
+             firstButtonPressed = false;
+             reset = false;
+         }
+
+    }
+
+
 }

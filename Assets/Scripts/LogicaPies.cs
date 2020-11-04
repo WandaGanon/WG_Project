@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class LogicaPies : MonoBehaviour
 {
-    public LogicaPersonaje1 pies;
+    PlayerNuevo pies;
     void Start()
     {
     
@@ -16,10 +16,11 @@ public class LogicaPies : MonoBehaviour
     }
     private void OnTriggerStay(Collider other) 
     {
-        pies.Can_jump = true;
+        Debug.Log(other);
+        //pies.suelo_real = true;
     }
     private void OnTriggerExit(Collider other) 
     {
-        pies.Can_jump = false;
+      //  pies.suelo_real = false;
     }
 }
