@@ -47,11 +47,44 @@ public class PlayerNuevo : MonoBehaviour
     public  float timeOfFirstButton = 0;
     public  float clickdelay = 0.5f;
      public  float t0, moveSpeed;
+
+    [Header("Colicion de la cabeza")]
+    public GameObject cabeza;
+    public LogicaCabeza logicaCabeza;
+
+
+/*
+    - problemas al bajar las escaleras 
+    *solucion posible crear o usar un codigo de pies que si el personaje 
+    esta tocando suelo con x profuncidad no realice animacion de caida
+    
+    -porblema al correr o caminar por los cubos con fisica
+    *solucion parecida a la de los escalones.
+
+    -problemas al agacharse y tratar que se mantenga agachado cuando este por debajo de algo
+    * Solucion revisar este video https://www.youtube.com/watch?v=a8d_q7sxodI&ab_channel=DonPachi
+
+    -problema que se produce al saltar mirando una pared, muestra animacion de caida.
+    *Solucion podria servir solucion de pies.
+    
+    -Fea animacion de correr a saltar, caer y tocar suelo
+    * podria agregarse una transicion adicional.
+
+    -Optimizar el codigo
+    * Solo viendo lo util de lo que no y tratando de compactar y documentar mas el codigo
+
+    -------------------------------------------------------
+    cosas a rescatar
+    el boton E esta para realizar RODAR
+    el Correr si lo apretar varias veces verifica si se realizo el doble clic con un mensaje en consola. (Se puede usar a futuro)
+
+*/
     void Start()
     {
         Player = GetComponent<CharacterController>();
         anim = GetComponent<Animator>();
         anim.SetBool("jump?",true);
+        cabeza.SetActive(false);
 
     }
 
@@ -107,21 +140,35 @@ public class PlayerNuevo : MonoBehaviour
         // Velocidad agachado
         else if(Player.isGrounded && Input.GetKey(KeyCode.LeftControl))
         { 
+            cabeza.SetActive(true);
             anim.SetBool("bend?", true);
             moverPlayer = moverPlayer * Velocidad * VelocidadAgachado; 
+            // Variable que se modifica al personaje con el fin de cambiar su colicion
             Player.height = 0.9f;
+            Player.center = new Vector3(0, 0.52f, 0);
+
         }
         // Velocidad Para Caminar
         else{ 
             moverPlayer = moverPlayer * Velocidad; 
-            anim.SetBool("run?", false);
-            anim.SetBool("bend?", false);
+            anim.SetBool("run?", false); 
         }
 
             //Cuando no este agachado
             if(Input.GetKeyUp(KeyCode.LeftControl))
             {
-            Player.height = 1.73f;
+                //se realiza pregunta a cabeza si tiene o no algun objeto arriba de este
+                if(logicaCabeza.contadorOnTrigger <= 0){
+                    cabeza.SetActive(false);
+                    anim.SetBool("bend?", false);
+                    cabeza.SetActive(false);
+                    // Variable que se modifica al personaje con el fin de cambiar su colicion
+                    Player.height = 1.73f;
+                    Player.center = new Vector3(0, 0.88f, 0);
+                }
+                else{
+                anim.SetBool("bend?", true);
+                }
             }
     }
 

@@ -7294,7 +7294,7 @@ CharacterController:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Height: 1.74
+  m_Height: 1.73
   m_Radius: 0.22
   m_SlopeLimit: 45
   m_StepOffset: 0.3
@@ -7328,6 +7328,14 @@ MonoBehaviour:
   floor: 0
   waitIdle: 0
   isOnSlope: 0
+  firstButtonPressed: 1
+  reset: 1
+  timeOfFirstButton: 0
+  clickdelay: 0.5
+  t0: 0
+  moveSpeed: 0
+  cabeza: {fileID: 1463837376}
+  logicaCabeza: {fileID: 1463837379}
 --- !u!4 &450301735 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2071190883433073368, guid: 09f8428d3ca1e0343b5d82966d0af739, type: 3}
@@ -17312,7 +17320,7 @@ Transform:
   m_GameObject: {fileID: 1048133586}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -2.67, y: 0.5, z: 9.67}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1, y: 2.3742, z: 1}
   m_Children: []
   m_Father: {fileID: 110195752}
   m_RootOrder: 47
@@ -24165,6 +24173,65 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 09f8428d3ca1e0343b5d82966d0af739, type: 3}
+--- !u!1 &1463837376
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1463837377}
+  - component: {fileID: 1463837378}
+  - component: {fileID: 1463837379}
+  m_Layer: 0
+  m_Name: Cabeza
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1463837377
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1463837376}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.692, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 450081951}
+  m_RootOrder: 6
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!136 &1463837378
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1463837376}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  m_Radius: 0.29
+  m_Height: 0.58
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1463837379
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1463837376}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9c17633c10b86344aa8ae520e25871e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  contadorOnTrigger: 0
 --- !u!4 &1465562698 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2071190883433073368, guid: 09f8428d3ca1e0343b5d82966d0af739, type: 3}
@@ -28053,7 +28120,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1654160525}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.17, y: 1.489, z: 9.67}
+  m_LocalPosition: {x: -0.17, y: 1.97, z: 9.67}
   m_LocalScale: {x: 6, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 110195752}
