@@ -14,7 +14,7 @@ public class PlayerNuevo : MonoBehaviour
     [Range(-1,1)]
     [Tooltip("Vector Vertical")]
     public float v;
-
+    public Rigidbody rb;
     private Vector3 playerInput;
 
 
@@ -38,15 +38,20 @@ public class PlayerNuevo : MonoBehaviour
     [Header("Verificar estado del Player")]
     public bool floor;
     public bool waitIdle;
+    public bool agachado;
+    public bool jump;
+    public bool run;
+
+
     public bool isOnSlope = false;
     private Animator anim;
- 
+ /*
     public bool firstButtonPressed = true;
     public bool reset = true;
 
     public  float timeOfFirstButton = 0;
     public  float clickdelay = 0.5f;
-     public  float t0, moveSpeed;
+     public  float t0, moveSpeed;*/
 
     [Header("Colicion de la cabeza")]
     public GameObject cabeza;
@@ -85,7 +90,7 @@ public class PlayerNuevo : MonoBehaviour
         anim = GetComponent<Animator>();
         anim.SetBool("jump?",true);
         cabeza.SetActive(false);
-
+        rb = GetComponent<Rigidbody>();
     }
 
     // Update is called once per frame
@@ -95,7 +100,10 @@ public class PlayerNuevo : MonoBehaviour
         v = Input.GetAxis("Vertical"); 
         Idle();
 
-        runRollVerificar();
+        //runRollVerificar();
+        agachado = anim.GetBool("bend?");
+        jump = anim.GetBool("jump?");
+        run = anim.GetBool("run?");
 
         if ( Input.GetKey(KeyCode.E) )
         {
@@ -129,23 +137,29 @@ public class PlayerNuevo : MonoBehaviour
     }
 
     void MovimientoJugador(){
+
         // Velovidad para Correr
-        if (Player.isGrounded && Input.GetKey(KeyCode.LeftShift))
+        if (Player.isGrounded && Input.GetKey(KeyCode.LeftShift) && !agachado)
         { 
             anim.SetBool("run?", true);
             moverPlayer = moverPlayer * Velocidad * VelocidadCorrer; 
 
-
         }
         // Velocidad agachado
-        else if(Player.isGrounded && Input.GetKey(KeyCode.LeftControl))
+        else if(Player.isGrounded && Input.GetKey(KeyCode.LeftControl) || agachado)
         { 
             cabeza.SetActive(true);
             anim.SetBool("bend?", true);
-            moverPlayer = moverPlayer * Velocidad * VelocidadAgachado; 
             // Variable que se modifica al personaje con el fin de cambiar su colicion
             Player.height = 0.9f;
             Player.center = new Vector3(0, 0.52f, 0);
+            if (Input.GetKey(KeyCode.LeftShift))
+            {
+            moverPlayer = moverPlayer * Velocidad * VelocidadAgachado * VelocidadCorrer; 
+            }
+            else{
+            moverPlayer = moverPlayer * Velocidad * VelocidadAgachado; 
+            }
 
         }
         // Velocidad Para Caminar
@@ -153,12 +167,11 @@ public class PlayerNuevo : MonoBehaviour
             moverPlayer = moverPlayer * Velocidad; 
             anim.SetBool("run?", false); 
         }
-
             //Cuando no este agachado
-            if(Input.GetKeyUp(KeyCode.LeftControl))
+            if(agachado && !Input.GetKey(KeyCode.LeftControl))
             {
                 //se realiza pregunta a cabeza si tiene o no algun objeto arriba de este
-                if(logicaCabeza.contadorOnTrigger <= 0){
+                if(logicaCabeza.contadorOnTrigger <= 0 ){
                     cabeza.SetActive(false);
                     anim.SetBool("bend?", false);
                     cabeza.SetActive(false);
@@ -166,9 +179,7 @@ public class PlayerNuevo : MonoBehaviour
                     Player.height = 1.73f;
                     Player.center = new Vector3(0, 0.88f, 0);
                 }
-                else{
-                anim.SetBool("bend?", true);
-                }
+
             }
     }
 
@@ -185,7 +196,7 @@ public class PlayerNuevo : MonoBehaviour
     }
 
     void PlayerJump(){
-        if (Player.isGrounded && Input.GetKeyDown(KeyCode.Space)) {
+        if (Player.isGrounded && Input.GetKeyDown(KeyCode.Space) && !agachado) {
             anim.SetBool("jump?",false);
             fallVelocity = jumpForce;
             moverPlayer.y = fallVelocity;
@@ -199,7 +210,6 @@ public class PlayerNuevo : MonoBehaviour
             fallVelocity = -gravedad * Time.deltaTime;
             moverPlayer.y = fallVelocity;
             anim.SetBool("jump?",true);
-
         }
         else
         {
@@ -222,7 +232,6 @@ public class PlayerNuevo : MonoBehaviour
 
             moverPlayer.y += slopeForceDown;
         }
-
         anim.SetBool("Slide?",isOnSlope);
     }
 
@@ -242,7 +251,7 @@ public class PlayerNuevo : MonoBehaviour
         anim.SetFloat("Velocidad_y", y); 
    }
 
- 
+ /*
     public void runRollVerificar()
     {
          if(Input.GetKeyDown(KeyCode.LeftShift) && firstButtonPressed) 
@@ -266,7 +275,7 @@ public class PlayerNuevo : MonoBehaviour
              reset = false;
          }
 
-    }
+    }*/
 
 
 }
