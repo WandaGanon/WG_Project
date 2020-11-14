@@ -56,6 +56,10 @@ public class PlayerNuevo : MonoBehaviour
     [Header("Colicion de la cabeza")]
     public GameObject cabeza;
     public LogicaCabeza logicaCabeza;
+    [Header("Colicion de Piso")]
+    public float distanceGround;
+    public bool isGrounded = false;
+
 
 
 /*
@@ -91,6 +95,8 @@ public class PlayerNuevo : MonoBehaviour
         anim.SetBool("jump?",true);
         cabeza.SetActive(false);
         rb = GetComponent<Rigidbody>();
+        //distancia con el piso
+        distanceGround = GetComponent<Collider>().bounds.extents.y;
     }
 
     // Update is called once per frame
@@ -99,12 +105,10 @@ public class PlayerNuevo : MonoBehaviour
         h = Input.GetAxis("Horizontal");
         v = Input.GetAxis("Vertical"); 
         Idle();
-
         //runRollVerificar();
         agachado = anim.GetBool("bend?");
         jump = anim.GetBool("jump?");
         run = anim.GetBool("run?");
-
         if ( Input.GetKey(KeyCode.E) )
         {
             anim.SetBool("roll?", true);
@@ -113,25 +117,17 @@ public class PlayerNuevo : MonoBehaviour
         {
             anim.SetBool("roll?", false);
         }
-
         playerInput = new Vector3(h, 0, v);
-
         InjectEjesPrincipales(h, v);
-
         //Es te es un ajuste para que cuando se realiza un velocidad en diagonal no sea superior al maximo
         playerInput = Vector3.ClampMagnitude(playerInput, 1);
-
         camDireccion();
-
         moverPlayer = playerInput.x * camRight + playerInput.z * camForward;
-
         MovimientoJugador();
-
         Player.transform.LookAt(Player.transform.position + moverPlayer);
-
         SetGravity();
-
         PlayerJump();
+        IsGrounded();
 
         Player.Move( moverPlayer * Time.deltaTime);
     }
@@ -174,7 +170,6 @@ public class PlayerNuevo : MonoBehaviour
                 if(logicaCabeza.contadorOnTrigger <= 0 ){
                     cabeza.SetActive(false);
                     anim.SetBool("bend?", false);
-                    cabeza.SetActive(false);
                     // Variable que se modifica al personaje con el fin de cambiar su colicion
                     Player.height = 1.73f;
                     Player.center = new Vector3(0, 0.88f, 0);
@@ -250,7 +245,21 @@ public class PlayerNuevo : MonoBehaviour
         anim.SetFloat("Velocidad_x", x);
         anim.SetFloat("Velocidad_y", y); 
    }
-
+    void IsGrounded()
+    {
+        if (!Physics.Raycast(transform.position, -Vector3.up, distanceGround))
+       {
+           isGrounded = false;
+           anim.SetBool("floor?",false);
+           print("aire");
+       }
+       else
+       {
+           isGrounded = true;
+           anim.SetBool("floor?",true);
+           print("tierra");
+       }
+    }
  /*
     public void runRollVerificar()
     {

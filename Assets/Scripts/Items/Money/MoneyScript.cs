@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class MoneyScript : MonoBehaviour
 {
-    private void OnTriggerEnter(Collider other) 
+    private void OnTriggerEnter(Collider Player) 
     {
         //tambien se puede usar enves de gameObject.name, gameObject.tag pero seteando objetos a tag
         if (gameObject.name == "Coins")

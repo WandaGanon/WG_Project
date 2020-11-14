@@ -6,10 +6,12 @@ public class LogicaCabeza : MonoBehaviour
 {
     public int contadorOnTrigger;
 
-    void OnTriggerEnter(Collider other) {
+    void OnTriggerEnter(Collider other) 
+    {
         contadorOnTrigger++;
     }
-    void OnTriggerExit(Collider other) {
+    void OnTriggerExit(Collider other) 
+    {
         contadorOnTrigger--;
     }
 }

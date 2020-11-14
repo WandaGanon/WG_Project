@@ -4,6 +4,17 @@ using UnityEngine;
 
 public class LogicaPies : MonoBehaviour
 {
+    public int OnFloorOnTrigger;
+
+    void OnTriggerEnter(Collider other) 
+    {
+        OnFloorOnTrigger++;
+    }
+    void OnTriggerExit(Collider other) 
+    {
+        OnFloorOnTrigger--;
+    }
+  /*
     PlayerNuevo pies;
     void Start()
     {
@@ -23,4 +34,5 @@ public class LogicaPies : MonoBehaviour
     {
       //  pies.suelo_real = false;
     }
+    */
 }
