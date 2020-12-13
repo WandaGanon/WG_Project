@@ -7,15 +7,22 @@ public class MoneyScript : MonoBehaviour
     private void OnTriggerEnter(Collider Player) 
     {
         //tambien se puede usar enves de gameObject.name, gameObject.tag pero seteando objetos a tag
-        if (gameObject.name == "Coins")
+        if (Player.gameObject.CompareTag("Player"))
         {
-            CoinAmount.coinAmount += 1;
-            Destroy (gameObject);
+            if ((gameObject.name == "Coins"))
+                {
+                    CoinAmount.coinAmount += 1;
+                    Destroy (gameObject);
+                }  
+            else if ((gameObject.name == "Gems"))
+                {
+                    GemAmount.gemAmount += 1;
+                    Destroy (gameObject);
+                }  
         }
-        if (gameObject.name == "Gems")
+        else
         {
-            GemAmount.gemAmount += 1;
-            Destroy (gameObject);
-        }        
+            Debug.Log("nothing");
+        }      
     }
 }

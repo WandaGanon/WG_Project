@@ -59,29 +59,23 @@ public class PlayerNuevo : MonoBehaviour
     [Header("Colicion de Piso")]
     public float distanceGround;
     public bool isGrounded = false;
+    public float groundAngle;
+    
 
-
-
+    public float distance = 1.0f; //  distancia del raycast hacia abajo, entre transform.position y el objeto de abajo
+    public LayerMask hitMask; // En que capa el raycast esta funcionando
 /*
     - problemas al bajar las escaleras 
-    *solucion posible crear o usar un codigo de pies que si el personaje 
-    esta tocando suelo con x profuncidad no realice animacion de caida
+    *posible solucion, sea problema de gravedad
     
     -porblema al correr o caminar por los cubos con fisica
     *solucion parecida a la de los escalones.
-
-    -problemas al agacharse y tratar que se mantenga agachado cuando este por debajo de algo
-    * Solucion revisar este video https://www.youtube.com/watch?v=a8d_q7sxodI&ab_channel=DonPachi
 
     -problema que se produce al saltar mirando una pared, muestra animacion de caida.
     *Solucion podria servir solucion de pies.
     
     -Fea animacion de correr a saltar, caer y tocar suelo
     * podria agregarse una transicion adicional.
-
-    -Optimizar el codigo
-    * Solo viendo lo util de lo que no y tratando de compactar y documentar mas el codigo
-
     -------------------------------------------------------
     cosas a rescatar
     el boton E esta para realizar RODAR
@@ -95,11 +89,11 @@ public class PlayerNuevo : MonoBehaviour
         anim.SetBool("jump?",true);
         cabeza.SetActive(false);
         rb = GetComponent<Rigidbody>();
-        //distancia con el piso
+        //distancia con el piso, se puede dejar como esta para que el programa lo calcule o cambiarlo por numeros fijos 
         distanceGround = GetComponent<Collider>().bounds.extents.y;
+        //hitMask con capa predefinida para el inspector
+        hitMask = LayerMask.GetMask("suelo");
     }
-
-    // Update is called once per frame
     void Update()
     {
         h = Input.GetAxis("Horizontal");
@@ -109,75 +103,29 @@ public class PlayerNuevo : MonoBehaviour
         agachado = anim.GetBool("bend?");
         jump = anim.GetBool("jump?");
         run = anim.GetBool("run?");
-        if ( Input.GetKey(KeyCode.E) )
-        {
-            anim.SetBool("roll?", true);
-        }
+        if (Input.GetKey(KeyCode.E))
+            {
+                anim.SetBool("roll?", true);
+            }
         else
-        {
-            anim.SetBool("roll?", false);
-        }
+            {
+                anim.SetBool("roll?", false);
+            }
         playerInput = new Vector3(h, 0, v);
         InjectEjesPrincipales(h, v);
-        //Es te es un ajuste para que cuando se realiza un velocidad en diagonal no sea superior al maximo
+        //Este es un ajuste para que cuando se realiza un velocidad en diagonal no sea superior al maximo
         playerInput = Vector3.ClampMagnitude(playerInput, 1);
         camDireccion();
         moverPlayer = playerInput.x * camRight + playerInput.z * camForward;
-        MovimientoJugador();
+        PlayerMovement();
         Player.transform.LookAt(Player.transform.position + moverPlayer);
         SetGravity();
         PlayerJump();
-        IsGrounded();
+        GroundDetails();
 
         Player.Move( moverPlayer * Time.deltaTime);
+       
     }
-
-    void MovimientoJugador(){
-
-        // Velovidad para Correr
-        if (Player.isGrounded && Input.GetKey(KeyCode.LeftShift) && !agachado)
-        { 
-            anim.SetBool("run?", true);
-            moverPlayer = moverPlayer * Velocidad * VelocidadCorrer; 
-
-        }
-        // Velocidad agachado
-        else if(Player.isGrounded && Input.GetKey(KeyCode.LeftControl) || agachado)
-        { 
-            cabeza.SetActive(true);
-            anim.SetBool("bend?", true);
-            // Variable que se modifica al personaje con el fin de cambiar su colicion
-            Player.height = 0.9f;
-            Player.center = new Vector3(0, 0.52f, 0);
-            if (Input.GetKey(KeyCode.LeftShift))
-            {
-            moverPlayer = moverPlayer * Velocidad * VelocidadAgachado * VelocidadCorrer; 
-            }
-            else{
-            moverPlayer = moverPlayer * Velocidad * VelocidadAgachado; 
-            }
-
-        }
-        // Velocidad Para Caminar
-        else{ 
-            moverPlayer = moverPlayer * Velocidad; 
-            anim.SetBool("run?", false); 
-        }
-            //Cuando no este agachado
-            if(agachado && !Input.GetKey(KeyCode.LeftControl))
-            {
-                //se realiza pregunta a cabeza si tiene o no algun objeto arriba de este
-                if(logicaCabeza.contadorOnTrigger <= 0 ){
-                    cabeza.SetActive(false);
-                    anim.SetBool("bend?", false);
-                    // Variable que se modifica al personaje con el fin de cambiar su colicion
-                    Player.height = 1.73f;
-                    Player.center = new Vector3(0, 0.88f, 0);
-                }
-
-            }
-    }
-
     void camDireccion(){
 
         camForward = mainCamera.transform.forward;
@@ -189,7 +137,70 @@ public class PlayerNuevo : MonoBehaviour
         camForward = camForward.normalized;
         camRight = camRight.normalized;
     }
+    public void  Idle()
+    {
+        if(h == 0  && v == 0){ anim.SetBool("waitIdle?", true); }
+        else{ anim.SetBool("waitIdle?", false); }
 
+        waitIdle = anim.GetBool("waitIdle?");
+    }  
+    void PlayerMovement()
+    {
+        walkPlayer();
+        runPlayer();
+        bendPlayer();
+    }
+    void walkPlayer()
+    {
+        // Velocidad Para Caminar
+        if (Player.isGrounded && !agachado)
+        {
+            anim.SetBool("run?", false); 
+            moverPlayer = moverPlayer * Velocidad; 
+        }
+    }
+    void runPlayer()
+    {
+        // Velovidad para Correr
+        if (Player.isGrounded && Input.GetKey(KeyCode.LeftShift) && !agachado)
+        { 
+            anim.SetBool("run?", true);
+            moverPlayer = moverPlayer * VelocidadCorrer; 
+        }
+    }
+    void bendPlayer()
+    {
+        //Cuando este agachado
+        if(Player.isGrounded && Input.GetKey(KeyCode.LeftControl) || agachado)
+        { 
+            cabeza.SetActive(true);
+            anim.SetBool("bend?", true);
+            // Variable que se modifica al personaje con el fin de cambiar su colicion
+            Player.height = 0.9f;
+            Player.center = new Vector3(0, 0.52f, 0);
+            if (Input.GetKey(KeyCode.LeftShift))
+            {
+                moverPlayer = moverPlayer * Velocidad * VelocidadAgachado * VelocidadCorrer; 
+            }
+            else
+            {
+                moverPlayer = moverPlayer * Velocidad * VelocidadAgachado; 
+            }
+        }
+        //Cuando no este agachado
+        if(agachado && !Input.GetKey(KeyCode.LeftControl))
+            {
+                //se realiza pregunta a cabeza si tiene o no algun objeto arriba de este
+                if(logicaCabeza.contadorOnTrigger <= 0 )
+                {
+                    cabeza.SetActive(false);
+                    anim.SetBool("bend?", false);
+                    // Variable que se modifica al personaje con el fin de cambiar su colicion
+                    Player.height = 1.73f;
+                    Player.center = new Vector3(0, 0.95f, 0);
+                }
+            }
+    }
     void PlayerJump(){
         if (Player.isGrounded && Input.GetKeyDown(KeyCode.Space) && !agachado) {
             anim.SetBool("jump?",false);
@@ -197,7 +208,6 @@ public class PlayerNuevo : MonoBehaviour
             moverPlayer.y = fallVelocity;
         }
     }
-
     void SetGravity(){
         if (Player.isGrounded)
         {
@@ -208,16 +218,17 @@ public class PlayerNuevo : MonoBehaviour
         }
         else
         {
+            floor = false; 
             fallVelocity -= gravedad * Time.deltaTime;
             moverPlayer.y = fallVelocity;
-            floor = false; 
         }
 
         anim.SetBool("floor?",floor);
         SlideDown();
     }
 
-    public void SlideDown(){
+    public void SlideDown()
+    {
         isOnSlope = Vector3.Angle(Vector3.up, hitNormal) >= Player.slopeLimit;
 
         if (isOnSlope == true)
@@ -229,37 +240,63 @@ public class PlayerNuevo : MonoBehaviour
         }
         anim.SetBool("Slide?",isOnSlope);
     }
-
-    public void  Idle(){
-        if(h == 0  && v == 0){ anim.SetBool("waitIdle?", true); }
-        else{ anim.SetBool("waitIdle?", false); }
-
-        waitIdle = anim.GetBool("waitIdle?");
-    }   
-
-    private void OnControllerColliderHit(ControllerColliderHit hit) {
+    private void OnControllerColliderHit(ControllerColliderHit hit) 
+    {
         hitNormal  = hit.normal;
     }
-
-    public void InjectEjesPrincipales(float x, float y){
+    public void InjectEjesPrincipales(float x, float y)
+    {
         anim.SetFloat("Velocidad_x", x);
         anim.SetFloat("Velocidad_y", y); 
-   }
+    }
+    void GroundDetails()
+    {
+        IsGrounded();
+        GroundAngles();
+    }
     void IsGrounded()
     {
         if (!Physics.Raycast(transform.position, -Vector3.up, distanceGround))
        {
+
            isGrounded = false;
+           floor = false; 
            anim.SetBool("floor?",false);
-           print("aire");
+           print("NO esta tocando piso");
        }
        else
        {
            isGrounded = true;
+           floor = true; 
            anim.SetBool("floor?",true);
-           print("tierra");
+           print("esta tocando piso");
        }
     }
+    void GroundAngles()
+    {
+        Ray ray = new Ray(transform.position, Vector3.down);
+        RaycastHit hit;
+        if (Physics.Raycast(ray, out hit, distance, hitMask))
+         {
+            float angle = Vector3.Angle(hit.normal, Vector3.up);
+            Debug.Log("Angulo " + angle);
+         }
+    }
+
+    
+ /*    
+    void FixedUpdate(){
+        Vector3 moveVect = new Vector3(GetAxisRaw("Vertical"), 0, -GetAxisRaw("Horizontal"));//sideways player controls
+        moveVect = Vector3.Cross(upVect, moveVect);//set move direction
+        GetComponent<Rigidbody>().velocity = moveVect * speed;//sample application of movement direction
+    }
+    void OnCollisionStay(Collision col){
+        if(col.contacts[0].normal.y > 0.7f){//check if ground is walkable, in this case 45 degrees and lower
+            upVect = col.contacts[0].normal;//set up direction
+        }
+    } */
+
+
  /*
     public void runRollVerificar()
     {
