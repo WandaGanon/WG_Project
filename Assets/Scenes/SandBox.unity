@@ -7545,6 +7545,7 @@ MonoBehaviour:
   agachado: 0
   jump: 0
   run: 0
+  aaa: 0
   isOnSlope: 0
   cabeza: {fileID: 1463837376}
   logicaCabeza: {fileID: 1463837379}
