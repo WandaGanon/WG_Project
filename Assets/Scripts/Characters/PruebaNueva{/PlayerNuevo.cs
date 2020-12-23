@@ -16,8 +16,6 @@ public class PlayerNuevo : MonoBehaviour
     public float v;
     public Rigidbody rb;
     private Vector3 playerInput;
-
-
     private Vector3 hitNormal;
         
     private Vector3 moverPlayer;
@@ -42,16 +40,8 @@ public class PlayerNuevo : MonoBehaviour
     public bool jump;
     public bool run;
 
-
     public bool isOnSlope = false;
     private Animator anim;
- /*
-    public bool firstButtonPressed = true;
-    public bool reset = true;
-
-    public  float timeOfFirstButton = 0;
-    public  float clickdelay = 0.5f;
-     public  float t0, moveSpeed;*/
 
     [Header("Colicion de la cabeza")]
     public GameObject cabeza;
@@ -60,96 +50,74 @@ public class PlayerNuevo : MonoBehaviour
     public float distanceGround;
     public bool isGrounded = false;
     public float groundAngle;
-    
 
     public float distance = 1.0f; //  distancia del raycast hacia abajo, entre transform.position y el objeto de abajo
     public LayerMask hitMask; // En que capa el raycast esta funcionando
-/*
-    - problemas al bajar las escaleras 
-    *posible solucion, sea problema de gravedad
-    
-    -porblema al correr o caminar por los cubos con fisica
-    *solucion parecida a la de los escalones.
 
-    -problema que se produce al saltar mirando una pared, muestra animacion de caida.
-    *Solucion podria servir solucion de pies.
-    
-    -Fea animacion de correr a saltar, caer y tocar suelo
-    * podria agregarse una transicion adicional.
-    -------------------------------------------------------
-    cosas a rescatar
-    el boton E esta para realizar RODAR
-    el Correr si lo apretar varias veces verifica si se realizo el doble clic con un mensaje en consola. (Se puede usar a futuro)
-
-*/
+    /*
+    Start:
+    */
     void Start()
     {
-        Player = GetComponent<CharacterController>();
-        anim = GetComponent<Animator>();
-        anim.SetBool("jump?",true);
-        cabeza.SetActive(false);
-        rb = GetComponent<Rigidbody>();
-        //distancia con el piso, se puede dejar como esta para que el programa lo calcule o cambiarlo por numeros fijos 
-        distanceGround = GetComponent<Collider>().bounds.extents.y;
-        //hitMask con capa predefinida para el inspector
-        hitMask = LayerMask.GetMask("suelo");
+        setingData();
     }
+    /*
+    Update: 
+    */
     void Update()
     {
-        h = Input.GetAxis("Horizontal");
-        v = Input.GetAxis("Vertical"); 
         Idle();
-        //runRollVerificar();
-        agachado = anim.GetBool("bend?");
-        jump = anim.GetBool("jump?");
-        run = anim.GetBool("run?");
-        if (Input.GetKey(KeyCode.E))
-            {
-                anim.SetBool("roll?", true);
-            }
-        else
-            {
-                anim.SetBool("roll?", false);
-            }
+        PlayerMovement();
+        SetGravity();
+        PlayerJump();
+
+        Player.Move( moverPlayer * Time.deltaTime);
+
+        getAnim();
+        betterment();
+    }
+
+    // ----------------------------------------------- Movimiento ------------------------------------------------ //
+    /*
+    Idle: Analiza el codigo cuando el player no realiza ningun movimiento
+    */
+    public void  Idle()
+    {
+        h = Input.GetAxis("Horizontal");
+        v = Input.GetAxis("Vertical");
+
+        anim.SetFloat("Velocidad_x", h);
+        anim.SetFloat("Velocidad_y", v); 
+
+        if(h == 0  && v == 0){ anim.SetBool("waitIdle?", true); }
+        else{ anim.SetBool("waitIdle?", false); }
+    }  
+
+    /*
+    PlayerMovement: Analiza el codigo cuando el player  realiza ningun movimiento, y este esta segmentado en 3 partes Caminar, Correr y agacharce
+    */
+    void PlayerMovement()
+    {
+        GroundDetails();
+
         playerInput = new Vector3(h, 0, v);
-        InjectEjesPrincipales(h, v);
         //Este es un ajuste para que cuando se realiza un velocidad en diagonal no sea superior al maximo
         playerInput = Vector3.ClampMagnitude(playerInput, 1);
         camDireccion();
         moverPlayer = playerInput.x * camRight + playerInput.z * camForward;
-        PlayerMovement();
         Player.transform.LookAt(Player.transform.position + moverPlayer);
-        SetGravity();
-        PlayerJump();
-        GroundDetails();
 
-        Player.Move( moverPlayer * Time.deltaTime);
-       
+
+        if(h != 0  && v != 0 || h == 0  && v != 0 || h != 0  && v == 0){
+            walkPlayer();
+            runPlayer();
+            bendPlayer();
+        }
     }
-    void camDireccion(){
 
-        camForward = mainCamera.transform.forward;
-        camRight = mainCamera.transform.right;
-
-        camForward.y =  0;
-        camRight.y = 0;
-
-        camForward = camForward.normalized;
-        camRight = camRight.normalized;
-    }
-    public void  Idle()
-    {
-        if(h == 0  && v == 0){ anim.SetBool("waitIdle?", true); }
-        else{ anim.SetBool("waitIdle?", false); }
-
-        waitIdle = anim.GetBool("waitIdle?");
-    }  
-    void PlayerMovement()
-    {
-        walkPlayer();
-        runPlayer();
-        bendPlayer();
-    }
+    /*
+    walkPlayer:
+    */
     void walkPlayer()
     {
         // Velocidad Para Caminar
@@ -158,7 +126,13 @@ public class PlayerNuevo : MonoBehaviour
             anim.SetBool("run?", false); 
             moverPlayer = moverPlayer * Velocidad; 
         }
+        if(!jump){
+            moverPlayer = moverPlayer * Velocidad; 
+        }
     }
+    /*
+    runPlayer: 
+    */
     void runPlayer()
     {
         // Velovidad para Correr
@@ -167,10 +141,15 @@ public class PlayerNuevo : MonoBehaviour
             anim.SetBool("run?", true);
             moverPlayer = moverPlayer * VelocidadCorrer; 
         }
+        if(!jump  && Input.GetKey(KeyCode.LeftShift)){
+            moverPlayer = moverPlayer * VelocidadCorrer; 
+        }
     }
-    void bendPlayer()
+    /*
+    bendPlayer: Cuando este agachado
+    */
+    void bendPlayer() 
     {
-        //Cuando este agachado
         if(Player.isGrounded && Input.GetKey(KeyCode.LeftControl) || agachado)
         { 
             cabeza.SetActive(true);
@@ -201,6 +180,28 @@ public class PlayerNuevo : MonoBehaviour
                 }
             }
     }
+
+
+    // ----------------------------------------------- Camara ----------------------------------------------------//
+    /*
+    camDireccion: funcion a coloca la camara atras el
+    */
+    void camDireccion(){
+
+        camForward = mainCamera.transform.forward;
+        camRight = mainCamera.transform.right;
+
+        camForward.y =  0;
+        camRight.y = 0;
+
+        camForward = camForward.normalized;
+        camRight = camRight.normalized;
+    }
+
+    // ----------------------------------------------- Salto -----------------------------------------------------//
+    /*
+    PlayerJump
+    */
     void PlayerJump(){
         if (Player.isGrounded && Input.GetKeyDown(KeyCode.Space) && !agachado) {
             anim.SetBool("jump?",false);
@@ -208,6 +209,11 @@ public class PlayerNuevo : MonoBehaviour
             moverPlayer.y = fallVelocity;
         }
     }
+
+    // ----------------------------------------------- Gravedad --------------------------------------------------//
+    /*
+    SetGravity
+    */
     void SetGravity(){
         if (Player.isGrounded)
         {
@@ -227,6 +233,10 @@ public class PlayerNuevo : MonoBehaviour
         SlideDown();
     }
 
+    // ----------------------------------------------- Deslizar --------------------------------------------------//
+    /*
+    SlideDown
+    */
     public void SlideDown()
     {
         isOnSlope = Vector3.Angle(Vector3.up, hitNormal) >= Player.slopeLimit;
@@ -239,21 +249,27 @@ public class PlayerNuevo : MonoBehaviour
             moverPlayer.y += slopeForceDown;
         }
         anim.SetBool("Slide?",isOnSlope);
-    }
+    }    
+    /*
+    OnControllerColliderHit
+    */
     private void OnControllerColliderHit(ControllerColliderHit hit) 
     {
         hitNormal  = hit.normal;
     }
-    public void InjectEjesPrincipales(float x, float y)
-    {
-        anim.SetFloat("Velocidad_x", x);
-        anim.SetFloat("Velocidad_y", y); 
-    }
+
+    // ----------------------------------------------- Inyeccion de informacion a Anim -----------------------------------------------------//
+    /*
+    GroundDetails
+    */
     void GroundDetails()
     {
         IsGrounded();
         GroundAngles();
     }
+    /*
+    IsGrounded
+    */
     void IsGrounded()
     {
         if (!Physics.Raycast(transform.position, -Vector3.up, distanceGround))
@@ -272,6 +288,9 @@ public class PlayerNuevo : MonoBehaviour
            print("esta tocando piso");
        }
     }
+    /*
+    GroundAngles
+    */
     void GroundAngles()
     {
         Ray ray = new Ray(transform.position, Vector3.down);
@@ -283,7 +302,48 @@ public class PlayerNuevo : MonoBehaviour
          }
     }
 
+    // ----------------------------------------------- Set inicio -----------------------------------------------------//
     
+    /*
+    setingData
+    */
+    void setingData(){
+        Player = GetComponent<CharacterController>();
+        anim = GetComponent<Animator>();
+
+        anim.SetBool("jump?",true);
+        cabeza.SetActive(false);
+        rb = GetComponent<Rigidbody>();
+        //distancia con el piso, se puede dejar como esta para que el programa lo calcule o cambiarlo por numeros fijos 
+        distanceGround = GetComponent<Collider>().bounds.extents.y;
+        //hitMask con capa predefinida para el inspector
+        hitMask = LayerMask.GetMask("suelo");
+    }
+
+    /*
+    getAnim
+    */
+    void getAnim(){
+        floor = anim.GetBool("floor?");
+        waitIdle = anim.GetBool("waitIdle?");
+        agachado = anim.GetBool("bend?");
+        jump = anim.GetBool("jump?");
+        run = anim.GetBool("run?");
+        isOnSlope = anim.GetBool("Slide?");
+    }
+
+    // ----------------------------------------------- Cosas a Mejorar -----------------------------------------------------//
+    void betterment(){
+        if (Input.GetKey(KeyCode.E))
+        {
+            anim.SetBool("roll?", true);
+        }
+        else
+        {
+            anim.SetBool("roll?", false);
+        }
+    }
+
  /*    
     void FixedUpdate(){
         Vector3 moveVect = new Vector3(GetAxisRaw("Vertical"), 0, -GetAxisRaw("Horizontal"));//sideways player controls
