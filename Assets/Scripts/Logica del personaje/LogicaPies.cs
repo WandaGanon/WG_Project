@@ -34,5 +34,14 @@ public class LogicaPies : MonoBehaviour
     {
       //  pies.suelo_real = false;
     }
+
+    private void OnTriggerStay(Collider other) 
+    {
+        pies.Can_jump = true;
+    }
+    private void OnTriggerExit(Collider other) 
+    {
+        pies.Can_jump = false;
+    }
     */
 }

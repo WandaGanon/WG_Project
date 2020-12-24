@@ -2,18 +2,68 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+namespace SG
+{
 //seleccionara siempre al padre por default
 [SelectionBase]
 //permite que las funciones trabajen en el modo editor
 [ExecuteInEditMode]
 public class CharacterBase : MonoBehaviour
-{
-    [TextArea(1, 1)]
-        public string Anotaciones = "Se puede clickear el script en si para acceder a sus funciones extras.";
-    [Header("Basic Character Stats")]
+    {
+        public HealthBar healthbar;
+        private void Start() 
+        {
+            /* maxHealth = SetMaxHealthFromHealthLevel(); */
+            currentHealth = maxHealth;
+            healthbar.SetMaxHealth(maxHealth); 
+        }
+        private void Update()
+        {
+            LimitLife();
+            /* SetMaxHealthFromHealthLevel(); */
+        }
+        /* private float SetMaxHealthFromHealthLevel()
+        {
+            maxHealth = CharacterLevel * 10;
+            return maxHealth;
+        }  */
+        public void TakeDamage (float negativeDamage)
+        {
+            currentHealth = currentHealth - negativeDamage;
+            healthbar.SetCurrentHealth(currentHealth);
+        }
+        public void HealDamage (float positiveDamage)
+        {
+            if (currentHealth != 100)
+            {
+                currentHealth = currentHealth + positiveDamage;
+                healthbar.SetCurrentHealth(currentHealth);
+            }
+            else{}
+        }
+        public void LimitLife()
+        {
+            if (currentHealth >= maxHealth)
+            {
+                currentHealth = maxHealth;
+            }
+            else{}
+        }
+
+        [TextArea(1, 1)]
+            public string Anotaciones = "Se puede clickear el script en si para acceder a sus funciones extras.";
+        [Header("Basic Character Stats")]
         [Range(0, 100)]
+            [Tooltip("Level Character")]
+        public float CharacterLevel = 1;
+        [Range(0, 200)]
         [Tooltip("Vida del NPC")]
-            public float life;
+            public float maxHealth;
+        [Range(0, 200)]
+        [Tooltip("Vida actual NPC")]
+            public float currentHealth;
+
         [Range(0, 100)]
         [Tooltip("Mana del NPC")]
            public float mana;
@@ -85,4 +135,5 @@ public class CharacterBase : MonoBehaviour
         {
             transform.position = Vector3.zero;
         }
+    }
 }
