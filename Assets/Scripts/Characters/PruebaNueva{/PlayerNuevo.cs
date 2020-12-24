@@ -356,7 +356,6 @@ public class PlayerNuevo : MonoBehaviour
         }
     } */
 
-
  /*
     public void runRollVerificar()
     {
