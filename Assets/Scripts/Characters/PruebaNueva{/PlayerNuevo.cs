@@ -34,13 +34,15 @@ public class PlayerNuevo : MonoBehaviour
     public float slideVelocity = 7f;
 
     [Header("Verificar estado del Player")]
-    public bool floor;
+    public bool onGround;
     public bool waitIdle;
     public bool agachado;
     public bool jump;
     public bool run;
+    public bool OnGroundAngles_0;
+    public bool OnGroundFloor;
 
-    public bool isOnSlope = false;
+    public bool isOnSlope;
     private Animator anim;
 
     [Header("Colicion de la cabeza")]
@@ -48,12 +50,18 @@ public class PlayerNuevo : MonoBehaviour
     public LogicaCabeza logicaCabeza;
     [Header("Colicion de Piso")]
     public float distanceGround;
-    public bool isGrounded = false;
-    public float groundAngle;
+    public float distanceGroundMAX;
 
-    public float distance = 1.0f; //  distancia del raycast hacia abajo, entre transform.position y el objeto de abajo
+    public float distanceAngle = 1.0f; //  distancia del raycast hacia abajo, entre transform.position y el objeto de abajo
     public LayerMask hitMask; // En que capa el raycast esta funcionando
-
+    [SerializeField]
+    private float slopeForce;
+    [SerializeField]
+    private float slopeForceRayLengh;
+    [SerializeField] GameObject stepRayUpper;
+    [SerializeField] GameObject stepRayLower;
+    [SerializeField] float stepHeight = 0.3f;
+    [SerializeField] float stepSmooth = 2f;
     /*
     Start:
     */
@@ -76,7 +84,6 @@ public class PlayerNuevo : MonoBehaviour
         getAnim();
         betterment();
     }
-
     // ----------------------------------------------- Movimiento ------------------------------------------------ //
     /*
     Idle: Analiza el codigo cuando el player no realiza ningun movimiento
@@ -108,13 +115,13 @@ public class PlayerNuevo : MonoBehaviour
         Player.transform.LookAt(Player.transform.position + moverPlayer);
 
 
-        if(h != 0  && v != 0 || h == 0  && v != 0 || h != 0  && v == 0){
+        if(h != 0  && v != 0 || h == 0  && v != 0 || h != 0  && v == 0)
+        {
             walkPlayer();
-            runPlayer();
+            runPlayer();    
             bendPlayer();
         }
     }
-
     /*
     walkPlayer:
     */
@@ -126,7 +133,8 @@ public class PlayerNuevo : MonoBehaviour
             anim.SetBool("run?", false); 
             moverPlayer = moverPlayer * Velocidad; 
         }
-        if(!jump){
+        if(!jump)
+        {
             moverPlayer = moverPlayer * Velocidad; 
         }
     }
@@ -180,8 +188,6 @@ public class PlayerNuevo : MonoBehaviour
                 }
             }
     }
-
-
     // ----------------------------------------------- Camara ----------------------------------------------------//
     /*
     camDireccion: funcion a coloca la camara atras el
@@ -202,37 +208,15 @@ public class PlayerNuevo : MonoBehaviour
     /*
     PlayerJump
     */
-    void PlayerJump(){
-        if (Player.isGrounded && Input.GetKeyDown(KeyCode.Space) && !agachado) {
+    void PlayerJump()
+    {
+        if (Player.isGrounded && Input.GetKeyDown(KeyCode.Space) && !agachado) 
+        {
             anim.SetBool("jump?",false);
             fallVelocity = jumpForce;
             moverPlayer.y = fallVelocity;
         }
     }
-
-    // ----------------------------------------------- Gravedad --------------------------------------------------//
-    /*
-    SetGravity
-    */
-    void SetGravity(){
-        if (Player.isGrounded)
-        {
-            floor = true; 
-            fallVelocity = -gravedad * Time.deltaTime;
-            moverPlayer.y = fallVelocity;
-            anim.SetBool("jump?",true);
-        }
-        else
-        {
-            floor = false; 
-            fallVelocity -= gravedad * Time.deltaTime;
-            moverPlayer.y = fallVelocity;
-        }
-
-        anim.SetBool("floor?",floor);
-        SlideDown();
-    }
-
     // ----------------------------------------------- Deslizar --------------------------------------------------//
     /*
     SlideDown
@@ -257,53 +241,174 @@ public class PlayerNuevo : MonoBehaviour
     {
         hitNormal  = hit.normal;
     }
-
+    // ----------------------------------------------- Gravedad --------------------------------------------------//
+    /*
+    SetGravity
+    */
+    void SetGravity()
+    {
+        if (Player.isGrounded)
+        {
+            onGround = true; 
+            fallVelocity = -gravedad * Time.deltaTime;
+            moverPlayer.y = fallVelocity;
+            anim.SetBool("jump?",true);
+        }
+        else
+        {
+            onGround = false; 
+            fallVelocity -= gravedad * Time.deltaTime;
+            moverPlayer.y = fallVelocity;
+        }
+        anim.SetBool("OnFloor?",onGround);
+        SlideDown();
+    }
     // ----------------------------------------------- Inyeccion de informacion a Anim -----------------------------------------------------//
     /*
     GroundDetails
     */
     void GroundDetails()
     {
-        IsGrounded();
-        GroundAngles();
+       OnGrounded();
+       stepClimb();
+       OnGroundAngles_0 = OnGroundAngles();
     }
-    /*
-    IsGrounded
-    */
-    void IsGrounded()
+        /* private void OnTriggerStay(Collider other)
     {
-        if (!Physics.Raycast(transform.position, -Vector3.up, distanceGround))
-       {
-
-           isGrounded = false;
-           floor = false; 
-           anim.SetBool("floor?",false);
-           print("NO esta tocando piso");
-       }
-       else
-       {
-           isGrounded = true;
-           floor = true; 
-           anim.SetBool("floor?",true);
-           print("esta tocando piso");
-       }
+        if (other.CompareTag("Stairs") && jump)
+        {
+            gravedad = 1000f;
+            Debug.Log("ENTROOOOOO");
+        }
+        if (other.CompareTag("Stairs") && !jump)
+        {
+            gravedad = 9.8f;
+            jumpForce = 8.52f;
+            Debug.Log("ASDASDASDASD");
+        }
     }
-    /*
-    GroundAngles
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Stairs"))
+        {
+            gravedad = 9.8f;
+            jumpForce = 8.52f;
+            Debug.Log("SALIIIIIIIIIIIO");
+        }
+        else{}
+    } */
+    private void Awake()
+    {
+       rb = GetComponent<Rigidbody>();
+       stepRayUpper.transform.position = new Vector3(stepRayUpper.transform.position.x, stepHeight, stepRayUpper.transform.position.z);
+    }
+    void stepClimb()
+    {
+        //si el personaje no esta en un angulo de 0 y esta en tierra aumenta su gravedad y fuerza de salto para contrarrestar la inclinacion
+        if (!OnGroundAngles_0 && Player.isGrounded)
+        {
+            isOnSlope = true;
+            jumpForce = 25f;
+            gravedad = 1000f;
+            if(Player.isGrounded && Input.GetKeyDown(KeyCode.Space) && !agachado)
+            {
+                isOnSlope = false;
+                gravedad = 9.8f;
+                jumpForce = 8.52f;
+            }
+        }
+        //si el personaje esta en angulo 0 en tierra o en aire, su gravedad sera normal
+        if (OnGroundAngles_0 && Player.isGrounded || OnGroundAngles_0 && !Player.isGrounded)
+        {
+            gravedad = 9.8f;
+            jumpForce = 8.52f;
+        }
+        if (Player.isGrounded && OnGroundAngles_0)
+        {
+            Debug.Log("PEROPORQUEEEE");
+            onGround = true;
+            jumpForce = 25f;
+            gravedad = 1000f;
+            RaycastHit hitLower;
+            RaycastHit hitLower45;
+            RaycastHit hitLowerMinus45;
+            if(Player.isGrounded && Input.GetKeyDown(KeyCode.Space) && !agachado)
+            {
+                gravedad = 9.8f;
+                jumpForce = 8.52f;
+            }
+            else if (Physics.Raycast(stepRayLower.transform.position, transform.TransformDirection(Vector3.forward), out hitLower, 0.1f))
+            {
+                RaycastHit hitUpper;
+                if (!Physics.Raycast(stepRayUpper.transform.position, transform.TransformDirection(Vector3.forward), out hitUpper, 0.2f))
+                {
+                    rb.position -= new Vector3(0f, -stepSmooth * Time.deltaTime, 0f);
+                    Debug.Log("hitLower");
+                }
+            }
+            else if (Physics.Raycast(stepRayLower.transform.position, transform.TransformDirection(1.5f,0,1), out hitLower45, 0.1f))
+            {
+                RaycastHit hitUpper45;
+                if (!Physics.Raycast(stepRayUpper.transform.position, transform.TransformDirection(1.5f,0,1), out hitUpper45, 0.2f))
+                {
+                    rb.position -= new Vector3(0f, -stepSmooth * Time.deltaTime, 0f);
+                    Debug.Log("hitLower45");
+                }
+            }
+            else if (Physics.Raycast(stepRayLower.transform.position, transform.TransformDirection(-1.5f,0,1), out hitLowerMinus45, 0.1f))
+            {
+                RaycastHit hitUpperMinus45;
+                if (!Physics.Raycast(stepRayUpper.transform.position, transform.TransformDirection(-1.5f,0,1), out hitUpperMinus45, 0.2f))
+                {
+                    rb.position -= new Vector3(0f, -stepSmooth * Time.deltaTime, 0f);
+                    Debug.Log("hitLowerMinus45");
+                }
+            }
+        }
+    }
+     /*
+    OnGroundAngles
     */
-    void GroundAngles()
+    private bool OnGroundAngles()
     {
         Ray ray = new Ray(transform.position, Vector3.down);
         RaycastHit hit;
-        if (Physics.Raycast(ray, out hit, distance, hitMask))
-         {
+        if (Physics.Raycast(ray, out hit, distanceAngle, hitMask))
+        {
             float angle = Vector3.Angle(hit.normal, Vector3.up);
             Debug.Log("Angulo " + angle);
-         }
+            if (angle != 0 && onGround)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+        return true;
+    }
+     /*
+    OnGrounded
+    */
+    void OnGrounded()
+    {
+        //Limitador de distancia entre piso y personaje para minimizar caidas pequeñas
+        if (distanceGround <= distanceGroundMAX)
+       {
+            onGround = true;
+            anim.SetBool("OnFloor?",true);
+            print("esta tocando piso");
+       }
+       else
+       {
+           onGround = false;
+           anim.SetBool("OnFloor?",false);
+           print("NO esta tocando piso");
+       }
     }
 
     // ----------------------------------------------- Set inicio -----------------------------------------------------//
-    
     /*
     setingData
     */
@@ -314,17 +419,17 @@ public class PlayerNuevo : MonoBehaviour
         anim.SetBool("jump?",true);
         cabeza.SetActive(false);
         rb = GetComponent<Rigidbody>();
-        //distancia con el piso, se puede dejar como esta para que el programa lo calcule o cambiarlo por numeros fijos 
-        distanceGround = GetComponent<Collider>().bounds.extents.y;
-        //hitMask con capa predefinida para el inspector
+        //distancia con el piso, se puede dejar como esta para que el programa lo calcule o cambiarlo por numeros fijos, 
+        //se le agrega un * al lado de Y para aumentar el numero
+        distanceGround = GetComponent<Collider>().bounds.extents.y + 1f;
+        //hitMask es la capa predefinida para el inspector
         hitMask = LayerMask.GetMask("suelo");
     }
-
     /*
     getAnim
     */
     void getAnim(){
-        floor = anim.GetBool("floor?");
+        onGround = anim.GetBool("OnFloor?");
         waitIdle = anim.GetBool("waitIdle?");
         agachado = anim.GetBool("bend?");
         jump = anim.GetBool("jump?");
@@ -343,7 +448,6 @@ public class PlayerNuevo : MonoBehaviour
             anim.SetBool("roll?", false);
         }
     }
-
  /*    
     void FixedUpdate(){
         Vector3 moveVect = new Vector3(GetAxisRaw("Vertical"), 0, -GetAxisRaw("Horizontal"));//sideways player controls
@@ -382,5 +486,5 @@ public class PlayerNuevo : MonoBehaviour
 
     }*/
 
-
+    
 }

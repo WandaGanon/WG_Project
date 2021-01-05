@@ -49,6 +49,7 @@ namespace SG
             }
             else {}
         }
+        //CUANDO EL PERSONAJE ENTRA EN EL COLLIDER EL TIEMPO SE REINICIA, EL DAÑO ES DE UNA UNICA VEZ
         void OnTriggerEnter(Collider other) 
         {
             timer = 0f;
@@ -71,11 +72,13 @@ namespace SG
                 }
             }
         }
+        //EL PERSONAJE SALE DEL TRIGGER POR LO QUE EL TIEMPO SE REINICIA
         void OnTriggerExit()
         {
             timer = 0f;
             playerInRange = false;
         }
+        //MIENTRAS EL PERSONAJE ENTRE EN EL COLLIDER, EL FLOAT DE timer Y EL DE damageCD HARAN DAÑO 
         void OnTriggerStay(Collider other) 
         {
             CharacterBase _characterStats = other.GetComponent<CharacterBase>();
